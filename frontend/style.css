@@ -1,0 +1,43 @@
+/* --- Professional Notes Page Design --- */
+body {
+  background: #f4f6f9 !important;
+}
+
+.box {
+  background: #ffffff;
+  max-width: 850px;
+  margin: 40px auto;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+  border: 1px solid #eef0f3;
+}
+
+.box h2, .box h3 {
+  color: #1a202c;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+/* Upload Section ko premium banana */
+input[type="file"] {
+  background: #f8fafc;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px dashed #cbd5e1;
+  width: 60%;
+}
+
+button {
+  background: #4f46e5 !important;
+  border-radius: 8px !important;
+  padding: 10px 22px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.3px;
+  transition: 0.2s;
+}
+
+button:hover {
+  background: #4338ca !important;
+  transform: translateY(-1px);
+}s

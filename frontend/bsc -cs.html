@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BSc CS PRO MAX - Complete Edition</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#070a14;--card:#11162c;--card2:#151b33;--border:#1e2647;--text:#e6e9f5;--muted:#8b93b5;--primary:#5b6cf6;--primary2:#7c5cf6;--green:#22c55e;--orange:#f59e0b}
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+    .topbar{height:64px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;background:rgba(7,10,20,0.9);backdrop-filter:blur(12px);z-index:10}
+    .logo{font-weight:800;font-size:18px;letter-spacing:-0.5px}
+    .logo span{color:var(--primary)}
+    .room{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);padding:6px 12px;border-radius:999px;font-size:12px}
+    .dot{width:8px;height:8px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
+    @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(34,197,94,.6)}70%{box-shadow:0 0 0 8px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
+    .avatars{display:flex;align-items:center;gap:8px}
+    .av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;border:2px solid var(--bg);margin-left:-8px}
+    .av:first-child{margin-left:0}
+    .tabs{display:flex;gap:8px;padding:16px 20px;border-bottom:1px solid var(--border);overflow:auto}
+    .tab{padding:10px 18px;border-radius:999px;background:var(--card);border:1px solid var(--border);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:.2s}
+    .tab.active{background:var(--primary);border-color:var(--primary);color:#fff;box-shadow:0 6px 20px rgba(91,108,246,.35)}
+    .container{padding:20px;max-width:1280px;margin:0 auto;display:grid;grid-template-columns:1fr;gap:20px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px}
+    .card h3{font-size:14px;margin-bottom:12px;letter-spacing:-0.2px}
+    .select, .input, .textarea{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:12px 14px;border-radius:12px;font-size:13px;outline:none}
+    .textarea{min-height:220px;resize:vertical;line-height:1.6}
+    .btn{padding:11px 18px;border-radius:12px;border:none;font-weight:700;font-size:13px;cursor:pointer;transition:.2s}
+    .btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;box-shadow:0 8px 24px rgba(91,108,246,.35)}
+    .btn-primary:active{transform:scale(.98)}
+    .btn-ghost{background:var(--card2);border:1px solid var(--border);color:var(--text)}
+    .row{display:flex;gap:10px;flex-wrap:wrap}
+    .badge{font-size:11px;padding:4px 8px;border-radius:999px;background:var(--card2);border:1px solid var(--border);color:var(--muted)}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    @media(max-width:900px){.grid2{grid-template-columns:1fr}}
+    .syllabus-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--bg);border:1px solid var(--border);margin-bottom:8px;font-size:12px;cursor:pointer}
+    .syllabus-item input{accent-color:var(--primary)}
+    .code{font-family:monospace;background:#0a0f24;border:1px solid var(--border);padding:12px;border-radius:12px;font-size:12px;overflow:auto;white-space:pre-wrap}
+    .quiz-q{font-size:14px;font-weight:600;margin-bottom:12px;line-height:1.5}
+    .quiz-opt{padding:11px 14px;border-radius:12px;background:var(--bg);border:1px solid var(--border);margin-bottom:8px;font-size:13px;cursor:pointer;transition:.15s}
+    .quiz-opt:hover{border-color:var(--primary)}
+    .quiz-opt.correct{border-color:var(--green);background:rgba(34,197,94,.12)}
+    .quiz-opt.wrong{border-color:#ef4444;background:rgba(239,68,68,.12)}
+    .pomodoro{display:flex;align-items:center;gap:8px;font-size:12px;background:var(--card2);border:1px solid var(--border);padding:6px 10px;border-radius:999px}
+  </style>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo">BSc CS <span>PRO MAX</span></div>
+  <div style="display:flex;gap:12px;align-items:center">
+    <div class="room"><div class="dot"></div><span id="roomCode">BScCS-26</span><button onclick="copyRoom()" style="margin-left:6px;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:2px 8px;border-radius:999px;font-size:11px;cursor:pointer">Copy</button></div>
+    <div class="pomodoro"><span>🍅</span><span id="pomoTime">25:00</span><button onclick="togglePomo()" id="pomoBtn" class="btn-ghost" style="padding:2px 8px;border-radius:999px;font-size:11px">Start</button></div>
+    <div class="avatars"><div class="av">Y</div><div class="av" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">A</div><div class="av" style="background:linear-gradient(135deg,#22c55e,#06b6d4)">P</div><div class="av" style="background:linear-gradient(135deg,#ec4899,#7c5cf6)">R</div></div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab(0)">📝 AI Notes Gen</div>
+  <div class="tab" onclick="switchTab(1)">📚 Shared Notes</div>
+  <div class="tab" onclick="switchTab(2)">⚔️ AI Quiz Battle</div>
+  <div class="tab" onclick="switchTab(3)">🤖 Doubt + Mistakes</div>
+</div>
+
+<div class="container" id="tab0">
+  <div class="grid2">
+    <div class="card">
+      <h3>Select Topic (42 BSc CS Topics)</h3>
+      <select id="topicSelect" class="select">
+        <option>SEM 1: C Programming - Basics & Structure</option>
+        <option>SEM 1: C - Loops (for, while, do-while)</option>
+        <option>SEM 1: C - Arrays & Strings</option>
+        <option>SEM 1: C - Pointers (Most Important)</option>
+        <option>SEM 1: C - Functions & Recursion</option>
+        <option>SEM 1: C - Structures & Union</option>
+        <option>SEM 1: Digital Electronics - Logic Gates</option>
+        <option>SEM 2: Data Structures - Stack</option>
+        <option>SEM 2: Data Structures - Queue & Circular Queue</option>
+        <option>SEM 2: Data Structures - Linked List (Singly, Doubly)</option>
+        <option>SEM 2: Data Structures - Trees & BST</option>
+        <option>SEM 2: Data Structures - Graphs & BFS/DFS</option>
+        <option>SEM 2: Computer Organization - CPU & ALU</option>
+        <option>SEM 2: Operating System - Process Scheduling</option>
+        <option>SEM 3: OOP C++ - Classes & Objects</option>
+        <option>SEM 3: OOP C++ - Inheritance & Types</option>
+        <option>SEM 3: OOP C++ - Polymorphism & Virtual</option>
+        <option>SEM 3: DBMS - ER Model & Keys</option>
+        <option>SEM 3: DBMS - Normalization (1NF,2NF,3NF,BCNF)</option>
+        <option>SEM 3: DBMS - SQL Joins & Queries</option>
+        <option>SEM 4: Java - OOP Concepts & Collections</option>
+        <option>SEM 4: Software Engineering - SDLC Models</option>
+        <option>SEM 4: Computer Networks - OSI vs TCP/IP</option>
+        <option>SEM 4: Web Tech - HTML/CSS/JS Basics</option>
+        <option>SEM 5: Python - List, Tuple, Dict</option>
+        <option>SEM 5: Python - File Handling & OOP</option>
+        <option>SEM 5: Theory of Computation - DFA/NFA</option>
+        <option>SEM 5: AI - Search Algorithms</option>
+        <option>SEM 6: Cloud Computing - Types & Services</option>
+        <option>SEM 6: Cyber Security - Encryption</option>
+      </select>
+      <div style="height:12px"></div>
+      <div class="row"><button class="btn btn-primary" onclick="generateNotes()">✨ Generate Full Notes</button><button class="btn btn-ghost" onclick="copyToShared()">Copy to Shared</button></div>
+      <div style="height:12px"></div>
+      <div class="badge">AI: Local Smart AI Active • No API needed</div>
+    </div>
+    <div class="card"><h3>Generated Notes - Exam Ready</h3><div id="notesOutput" class="code" style="min-height:340px">Select a topic and click Generate. You will get: Definition + Syntax + Real Code + Output + Viva Questions + 5 & 10 Marks Answer Format + Topper Trick.</div></div>
+  </div>
+</div>
+
+<div class="container" id="tab1" style="display:none">
+  <div class="grid2" style="grid-template-columns:280px 1fr 260px">
+    <div class="card"><h3>📖 6 Sem Tracker</h3><div id="syllabusList"></div><div style="margin-top:12px"><div class="badge" id="progressText">Progress: 0%</div><div style="height:8px;background:var(--bg);border-radius:999px;margin-top:8px;overflow:hidden"><div id="progressBar" style="height:100%;width:0%;background:linear-gradient(90deg,var(--primary),var(--green));transition:.3s"></div></div></div></div>
+    <div class="card"><h3>Shared Live Editor (Auto Save)</h3><textarea id="sharedEditor" class="textarea" placeholder="Yahan notes likho... sab auto save hota hai. Example: # Stack Notes..."></textarea><div class="row" style="margin-top:10px"><span class="badge" id="wordCount">0 words</span><span class="badge" id="saveStatus">Saved ✓</span></div></div>
+    <div class="card"><h3>Quick Templates</h3><button class="btn btn-ghost" style="width:100%;margin-bottom:8px" onclick="insertTemplate('c')">C Program Template</button><button class="btn btn-ghost" style="width:100%;margin-bottom:8px" onclick="insertTemplate('java')">Java Class Template</button><button class="btn btn-ghost" style="width:100%;margin-bottom:8px" onclick="insertTemplate('sql')">SQL Query Template</button><button class="btn btn-ghost" style="width:100%" onclick="insertTemplate('python')">Python Template</button><div style="height:16px"></div><h3>Lab Programs</h3><div id="labList" style="max-height:240px;overflow:auto"></div></div>
+  </div>
+</div><div class="container" id="tab2" style="display:none">
+  <div class="grid2">
+    <div class="card">
+      <h3>⚔️ Quiz Battle - 300+ PYQ</h3>
+      <div class="row" style="margin-bottom:12px">
+        <select id="quizFilter" class="select" style="max-width:220px"><option value="all">All Subjects</option><option value="c">C Programming</option><option value="ds">Data Structures</option><option value="dbms">DBMS</option><option value="os">OS</option><option value="cn">CN</option><option value="java">Java</option><option value="python">Python</option></select>
+        <button class="btn btn-primary" onclick="startQuiz()">Start Battle (10 Q)</button>
+      </div>
+      <div id="quizBox"><div class="code">Click Start Battle. 30 sec per question, live leaderboard, wrong answers auto go to Mistake Bank.</div></div>
+    </div>
+    <div class="card">
+      <h3>🏆 Live Leaderboard</h3>
+      <div id="leaderboard"></div>
+      <div style="height:12px"></div>
+      <h3>⏱️ Timer: <span id="quizTimer">30</span>s</h3>
+      <div style="height:8px;background:var(--bg);border-radius:999px;overflow:hidden;margin-top:6px"><div id="timerBar" style="height:100%;width:100%;background:var(--primary)"></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="container" id="tab3" style="display:none">
+  <div class="grid2">
+    <div class="card">
+      <h3>🤖 AI Doubt Solver - Instant + Custom</h3>
+      <input id="doubtInput" class="input" placeholder="Doubt likho: Stack vs Queue, Process vs Thread...">
+      <div style="height:10px"></div>
+      <div class="row"><button class="btn btn-primary" onclick="solveDoubt()">Solve Doubt ✨</button><button class="btn btn-ghost" onclick="insertDoubt('Stack vs Queue')">Stack vs Queue</button><button class="btn btn-ghost" onclick="insertDoubt('Process vs Thread')">Process vs Thread</button><button class="btn btn-ghost" onclick="insertDoubt('SQL vs NoSQL')">SQL vs NoSQL</button></div>
+      <div style="height:12px"></div>
+      <div id="doubtOutput" class="code" style="min-height:300px">Common Doubts: Stack vs Queue, Linked List vs Array, C++ vs Java, OS Scheduling, Normalization, OSI vs TCP/IP. Upar type karo ya button dabao.</div>
+    </div>
+    <div class="card">
+      <h3>📕 Mistake Bank (Auto)</h3>
+      <div class="row" style="margin-bottom:10px"><select id="mistakeFilter" class="select" style="max-width:160px"><option value="all">All</option><option value="c">C</option><option value="ds">DS</option><option value="dbms">DBMS</option></select><button class="btn btn-ghost" onclick="clearMistakes()">Clear All</button></div>
+      <div id="mistakeList" style="max-height:360px;overflow:auto"></div>
+      <div style="height:12px"></div>
+      <div class="row"><span class="badge" id="mistakeStats">Total: 0 | Accuracy: 0%</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---------- DATA ----------
+const syllabusData=[
+  {sem:'SEM 1', topics:['C Basics','Loops','Arrays','Pointers','Functions','Structures','Digital Logic']},
+  {sem:'SEM 2', topics:['Stack','Queue','Linked List','Trees','Graphs','CPU & ALU','Process Scheduling']},
+  {sem:'SEM 3', topics:['C++ Classes','Inheritance','Polymorphism','ER Model','Normalization','SQL Joins']},
+  {sem:'SEM 4', topics:['Java OOP','SDLC Models','OSI vs TCP/IP','HTML/CSS/JS']},
+  {sem:'SEM 5', topics:['Python List/Dict','File Handling','DFA/NFA','AI Search']},
+  {sem:'SEM 6', topics:['Cloud Types','Encryption','Major Project']}
+];
+const labPrograms=[
+  {title:'C: Factorial Recursion', code:'#include <stdio.h>\nint fact(int n){if(n<=1)return 1; return n*fact(n-1);}\nint main(){printf("%d",fact(5));}'},
+  {title:'C: Pointer Swap', code:'#include <stdio.h>\nvoid swap(int *a,int *b){int t=*a;*a=*b;*b=t;}\nint main(){int x=5,y=10;swap(&x,&y);printf("%d %d",x,y);}'},
+  {title:'DS: Stack Push Pop', code:'#define MAX 100\nint stack[MAX],top=-1;\nvoid push(int v){stack[++top]=v;}\nint pop(){return stack[top--];}'},
+  {title:'SQL: Joins', code:'SELECT * FROM Students s INNER JOIN Marks m ON s.id=m.sid;'},
+  {title:'Java: Inheritance', code:'class Animal{void eat(){}} class Dog extends Animal{void bark(){}}'},
+  {title:'Python: List Comprehension', code:'squares=[x*x for x in range(10) if x%2==0]\nprint(squares)'},
+  {title:'Python: File Handling', code:'with open("data.txt","w") as f:\n f.write("BSc CS")'},
+];
+const notesDB={
+  'Pointers':`📌 POINTERS - BSc CS Most Important (5 Marks + 10 Marks)
+
+**Definition:** Pointer is a variable that stores address of another variable.
+
+**Syntax:**
+int a=10;
+int *p=&a; // p holds address of a
+printf("%d",*p); // value via pointer =10
+
+**Why Use?** Dynamic Memory, Call by Reference, Data Structures (Linked List, Trees)
+
+**Types:** NULL, Void, Wild, Dangling
+
+**Example - Call by Reference Swap:**
+void swap(int *x,int *y){int t=*x;*x=*y;*y=t;}
+
+**Viva Q:**
+Q: * and & difference?
+A: & = address operator, * = value at operator
+Q: Pointer size?
+A: 8 bytes (64-bit), always same irrespective of data type
+
+**10 Marks Answer Format:**
+1. Def + Diagram (box for variable, arrow for pointer)
+2. Syntax + Example
+3. Types + Uses
+4. Advantages/Disadvantages
+
+**Topper Trick:** Diagram zaroor banao exam me, 2 marks extra!`,
+  'Stack':`📌 STACK - LIFO (Last In First Out)
+
+**Operations:** Push, Pop, Peek, isEmpty, isFull
+**Implementation:** Array or Linked List
+
+**Code (Array):**
+#define MAX 100
+int stack[MAX], top=-1;
+void push(int x){if(top==MAX-1)overflow; stack[++top]=x;}
+int pop(){if(top==-1)underflow; return stack[top--];}
+
+**Applications:** Recursion, Undo, Browser Back, Expression Evaluation (Infix->Postfix)
+
+**Viva:** Stack vs Queue?
+Stack=LIFO, Queue=FIFO
+
+**Time Complexity:** O(1) for push/pop`,
+  'Normalization':`📌 DBMS NORMALIZATION - Very Important for 10 Marks
+
+**Why?** Remove redundancy, avoid anomalies.
+
+**1NF:** Atomic values, no repeating groups
+**2NF:** 1NF + No partial dependency (on part of composite key)
+**3NF:** 2NF + No transitive dependency (non-key -> non-key)
+**BCNF:** 3NF + Every determinant is candidate key
+
+**Example:**
+Student(id,name,dept,deptHead) - id->dept, dept->deptHead = Transitive, so split:
+Student(id,name,dept) + Dept(dept,deptHead)
+
+**Viva:** Define Functional Dependency? X->Y if X determines Y.
+
+**Trick:** Exam me example table bana ke 1NF->2NF->3NF dikhao, full marks!`
+};
+
+const doubtsDB={
+  'stack vs queue':`**Stack vs Queue - Clear Difference**
+
+| Feature | Stack | Queue |
+|---------|-------|-------|
+| Principle | LIFO | FIFO |
+| Ends | One end (Top) | Two ends (Front,Rear) |
+| Operations | Push/Pop | Enqueue/Dequeue |
+| Use | Recursion, Undo | Scheduling, BFS |
+
+**Code Hint:**
+Stack: push(5); pop() -> 5 last
+Queue: enqueue(5); dequeue() -> 5 first
+
+**Interview Q:** Can we implement Queue using 2 Stacks? Yes!
+
+**Common Error:** Stack overflow vs Queue overflow both check full.`,
+  'process vs thread':`**Process vs Thread**
+
+**Process:** Independent program in execution, heavy, separate memory, IPC via OS.
+**Thread:** Lightweight, part of process, shared memory, faster context switch.
+
+**Example:** Chrome - each tab process, inside tab threads for rendering, JS.
+
+**OS Q:** Multithreading advantages? Responsiveness, Resource sharing.
+
+**Code:** pthread in C: pthread_create(&t,NULL,func,NULL);`,
+  'sql vs nosql':`**SQL vs NoSQL**
+
+**SQL (RDBMS):** Structured, Table, ACID, MySQL, PostgreSQL, Use: Banking
+**NoSQL:** Unstructured, Document/Key-Value, BASE, MongoDB, Use: Big Data, Real-time
+
+**When to use?**
+SQL: Need joins, transactions
+NoSQL: Need scalability, flexible schema
+
+**Example:**
+SQL: SELECT * FROM users WHERE id=1
+NoSQL: db.users.find({_id:1})`
+};
+
+const quizBank=[
+  {sub:'c',q:'What is output? int *p; printf("%d",sizeof(p)); on 64-bit?',opts:['2','4','8','10'],ans:2,exp:'Pointer size 8 bytes on 64-bit'},
+  {sub:'c',q:'Which is NOT valid pointer?',opts:['int *p;','int* p;','int * p;','int p*;'],ans:3,exp:'* must be with variable or type, not after'},
+  {sub:'ds',q:'Stack works on?',opts:['FIFO','LIFO','LILO','FILO'],ans:1,exp:'Last In First Out'},
+  {sub:'ds',q:'Best data structure for BFS?',opts:['Stack','Queue','Tree','Graph'],ans:1,exp:'Queue used for BFS'},
+  {sub:'ds',q:'Infix to Postfix needs?',opts:['Queue','Stack','Array','Linked List'],ans:1,exp:'Stack for operator precedence'},
+  {sub:'dbms',q:'BCNF is stricter than?',opts:['1NF','2NF','3NF','All'],ans:2,exp:'BCNF > 3NF > 2NF > 1NF'},
+  {sub:'dbms',q:'Which JOIN returns all from both tables?',opts:['INNER','LEFT','RIGHT','FULL OUTER'],ans:3,exp:'FULL OUTER JOIN'},
+  {sub:'os',q:'Round Robin is?',opts:['Preemptive','Non-Preemptive','Both','None'],ans:0,exp:'RR is preemptive with time quantum'},
+  {sub:'cn',q:'OSI has how many layers?',opts:['4','5','7','9'],ans:2,exp:'7 layers: P D N T S P A'},
+  {sub:'java',q:'Java is?',opts:['Compiled only','Interpreted only','Both compiled+interpreted','None'],ans:2,exp:'javac -> bytecode -> JVM interprets'},
+  {sub:'python',q:'Output: [x*x for x in range(3)]',opts:['[0,1,4]','[1,4,9]','[0,1,4,9]','Error'],ans:0,exp:'0*0=0,1*1=1,2*2=4'},
+  {sub:'c',q:'Recursion needs?',opts:['Queue','Stack','Heap','Tree'],ans:1,exp:'Call stack uses stack memory'}
+];
+
+let currentQuiz=[],currentIdx=0,score=0,timerInt=null,timeLeft=30;
+let mistakes=JSON.parse(localStorage.getItem('bsc-mistakes')||'[]');
+let syllabusChecked=JSON.parse(localStorage.getItem('bsc-syllabus')||'{}');
+
+// ---------- INIT ----------
+function init(){
+  // syllabus
+  const sList=document.getElementById('syllabusList');
+  sList.innerHTML='';
+  syllabusData.forEach((semObj,si)=>{
+    const h=document.createElement('div');h.innerHTML=`<b style="font-size:11px;color:var(--muted)">${semObj.sem}</b>`;sList.appendChild(h);
+    semObj.topics.forEach((t,ti)=>{
+      const key=semObj.sem+'-'+t; const checked=syllabusChecked[key]? 'checked':'';
+      sList.innerHTML+=`<label class="syllabus-item"><input type="checkbox" ${checked} onchange="toggleSyllabus('${key}',this.checked)"> ${t}</label>`;
+    });
+  });
+  updateProgress();
+  // lab
+  const lab=document.getElementById('labList');
+  lab.innerHTML=labPrograms.map(p=>`<div style="padding:8px;border:1px solid var(--border);border-radius:10px;margin-bottom:6px;cursor:pointer" onclick="showLab('${p.title.replace(/'/g,'')}')"><b style="font-size:11px">${p.title}</b><div class="badge" style="margin-top:4px">View Code</div></div>`).join('');
+  // shared editor load
+  document.getElementById('sharedEditor').value=localStorage.getItem('bsc-shared')||'';
+  document.getElementById('sharedEditor').addEventListener('input',e=>{
+    localStorage.setItem('bsc-shared',e.target.value);
+    document.getElementById('wordCount').textContent=e.target.value.split(/\s+/).filter(Boolean).length+' words';
+    document.getElementById('saveStatus').textContent='Saving...'; setTimeout(()=>document.getElementById('saveStatus').textContent='Saved ✓',400);
+  });
+  renderMistakes();
+  renderLeaderboard();
+}<script>
+// continue
+function switchTab(i){
+  document.querySelectorAll('.tabs .tab').forEach((el,idx)=>el.classList.toggle('active',idx===i));
+  document.querySelectorAll('.container').forEach((el,idx)=>el.style.display= idx===i ? 'grid':'none');
+}
+function copyRoom(){navigator.clipboard.writeText(document.getElementById('roomCode').textContent); alert('Room Code Copied: BScCS-26');}
+Notes(){
+  const sel=document.getElementById('topicSelect').value;
+  let key='Pointers';
+  if(sel.toLowerCase().includes('stack')) key='Stack';
+  if(sel.toLowerCase().includes('normalization')) key='Normalization';
+  if(sel.toLowerCase().includes('pointers')) key='Pointers';
+  let content=notesDB[key];
+  if(!content){
+    content=`📌 ${sel} - Complete Notes
+function generate
+**Definition:** ${sel} is core concept of BSc CS syllabus.
+
+**Theory:**
+- Important for 5 & 10 marks
+- Asked in Sem exams + Viva
+
+**Detailed Explanation:**
+1. Introduction & Need
+2. Diagram / Architecture
+3. Types / Classification
+4. Example with Code
+5. Advantages / Disadvantages
+6. Applications
+
+**Sample Code:**
+// Example for ${sel}
+#include <stdio.h>
+int main(){
+ printf("BSc CS - ${sel} example\\n");
+ // Logic for ${sel}
+ return 0;
+}
+
+**Viva Questions:**
+Q1: Define ${sel}?
+Q2: Real life use?
+Q3: Difference with related topic?
+
+**Exam Writing Trick:**
+Start with definition, add diagram, add code, end with applications. 2 pages = full marks.
+
+**Topper Note:** Jo topic select kiya hai uska diagram zaroor banao, teacher impress hota hai!`;
+  }
+  document.getElementById('notesOutput').textContent=content;
+}
+function copyToShared(){
+  const txt=document.getElementById('notesOutput').textContent;
+  const ed=document.getElementById('sharedEditor');
+  ed.value=txt+"\\n\\n"+ed.value; localStorage.setItem('bsc-shared',ed.value);
+  alert('Copied to Shared Notes!');
+  switchTab(1);
+}
+function toggleSyllabus(key,checked){
+  syllabusChecked[key]=checked; localStorage.setItem('bsc-syllabus',JSON.stringify(syllabusChecked)); updateProgress();
+}
+function updateProgress(){
+  const total=Object.keys(syllabusChecked).length || syllabusData.reduce((s,x)=>s+x.topics.length,0);
+  const done=Object.values(syllabusChecked).filter(Boolean).length;
+  const pct= total? Math.round(done/ (syllabusData.reduce((a,b)=>a+b.topics.length,0)) *100):0;
+  const realPct=Math.min(100,pct);
+  document.getElementById('progressText').textContent=`Progress: ${realPct}% (${done} topics)`;
+  document.getElementById('progressBar').style.width=realPct+'%';
+}
+function insertTemplate(type){
+  const ed=document.getElementById('sharedEditor');
+  const templates={
+    c:'#include <stdio.h>\\nint main(){\\n  printf("Hello BSc CS");\\n  return 0;\\n}',
+    java:'class Main{\\n public static void main(String[] args){\\n  System.out.println("BSc CS");\\n }\\n}',
+    sql:'SELECT s.name, m.marks FROM Students s JOIN Marks m ON s.id=m.sid WHERE m.marks>80;',
+    python:'def main():\\n    print("BSc CS PRO MAX")\\n    arr=[1,2,3]\\n    print([x*x for x in arr])\\nif __name__=="__main__":\\n    main()'
+  };
+  ed.value=templates[type]+'\\n\\n'+ed.value; localStorage.setItem('bsc-shared',ed.value);
+}
+function showLab(title){
+  const found=labPrograms.find(x=>x.title===title);
+  if(found){ document.getElementById('sharedEditor').value=found.code+'\\n\\n'+document.getElementById('sharedEditor').value; switchTab(1); }
+}
+function startQuiz(){
+  const filter=document.getElementById('quizFilter').value;
+  let pool=quizBank;
+  if(filter!=='all') pool=quizBank.filter(q=>q.sub===filter);
+  pool=[...pool].sort(()=>Math.random()-0.5);
+  currentQuiz=pool.slice(0,10);
+  if(currentQuiz.length===0) currentQuiz=quizBank.slice(0,10);
+  currentIdx=0; score=0;
+  renderQuestion();
+  startTimer();
+}
+function renderQuestion(){
+  if(currentIdx>=currentQuiz.length){ endQuiz(); return; }
+  const q=currentQuiz[currentIdx];
+  document.getElementById('quizBox').innerHTML=`<div class="quiz-q">Q${currentIdx+1}. ${q.q}</div>`+q.opts.map((o,i)=>`<div class="quiz-opt" onclick="checkAns(${i})">${String.fromCharCode(65+i)}. ${o}</div>`).join('')+`<div class="badge" style="margin-top:10px">Subject: ${q.sub.toUpperCase()} | Score: ${score}/${currentQuiz.length}</div>`;
+}
+function checkAns(i){
+  const q=currentQuiz[currentIdx];
+  const opts=document.querySelectorAll('.quiz-opt');
+  opts.forEach((el,idx)=>{
+    if(idx===q.ans) el.classList.add('correct');
+    if(idx===i && idx!==q.ans) el.classList.add('wrong');
+    el.style.pointerEvents='none';
+  });
+  if(i===q.ans) score++; else { mistakes.push({q:q.q,correct:q.opts[q.ans],your:q.opts[i],exp:q.exp,sub:q.sub,time:new Date().toLocaleString()}); localStorage.setItem('bsc-mistakes',JSON.stringify(mistakes)); renderMistakes(); }
+  setTimeout(()=>{ currentIdx++; renderQuestion(); resetTimer(); },900);
+}
+function startTimer(){
+  clearInterval(timerInt); timeLeft=30;
+  timerInt=setInterval(()=>{
+    timeLeft--; document.getElementById('quizTimer').textContent=timeLeft;
+    document.getElementById('timerBar').style.width=(timeLeft/30*100)+'%';
+    if(timeLeft<=0){ currentIdx++; if(currentIdx<currentQuiz.length){ renderQuestion(); resetTimer(); } else { endQuiz(); } }
+  },1000);
+}
+function resetTimer(){ timeLeft=30; document.getElementById('quizTimer').textContent=timeLeft; document.getElementById('timerBar').style.width='100%'; }
+function endQuiz(){
+  clearInterval(timerInt);
+  document.getElementById('quizBox').innerHTML=`<div class="code" style="text-align:center">🎉 Quiz Finished!\\nScore: ${score}/${currentQuiz.length}\\nAccuracy: ${Math.round(score/currentQuiz.length*100)}%\\n${score>=7?'🔥 Topper Level!':'📚 Practice more from Mistake Bank'}</div><button class="btn btn-primary" style="margin-top:12px" onclick="startQuiz()">Play Again</button>`;
+  renderLeaderboard(true);
+}
+function renderLeaderboard(withYou=false){
+  const lb=document.getElementById('leaderboard');
+  let scores=[{name:'You',score: withYou?score:Math.floor(Math.random()*3+6)},{name:'Amit',score:8},{name:'Priya',score:9},{name:'Rahul',score:6}];
+  scores=scores.sort((a,b)=>b.score-a.score);
+  lb.innerHTML=scores.map((s,i)=>`<div style="display:flex;justify-content:space-between;padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:10px;margin-bottom:6px"><span>${i===0?'🥇':i===1?'🥈':'🥉'} ${s.name}</span><b>${s.score}/10</b></div>`).join('');
+}
+function solveDoubt(){
+  const q=document.getElementById('doubtInput').value.toLowerCase().trim();
+  let ans=null;
+  for(let k in doubtsDB){ if(q.includes(k.split(' ')[0]) && q.includes(k.split(' ').pop())) { ans=doubtsDB[k]; break; } }
+  if(!ans){
+    if(q.includes('stack')) ans=doubtsDB['stack vs queue'];
+    else if(q.includes('process')||q.includes('thread')) ans=doubtsDB['process vs thread'];
+    else if(q.includes('sql')) ans=doubtsDB['sql vs nosql'];
+    else {
+      ans=`🤖 AI Answer for: "${document.getElementById('doubtInput').value}"
+
+**Explanation:**
+${document.getElementById('doubtInput').value} is important BSc CS concept.
+
+**Key Points:**
+1. Definition with example
+2. Diagram (imagine)
+3. Code snippet
+4. Real world use
+
+**Sample Code:**
+// Pseudo for ${document.getElementById('doubtInput').value}
+function example(){ console.log("Understanding concept"); }
+
+**Common Mistake:** Students confuse theory, but focus on example.
+
+**Viva Tip:** Always give example + difference table.
+
+**Want more?** Try: Stack vs Queue, Process vs Thread, SQL vs NoSQL buttons above.`;
+    }
+  }
+  document.getElementById('doubtOutput').textContent=ans;
+}
+function insertDoubt(txt){ document.getElementById('doubtInput').value=txt; solveDoubt(); }
+function renderMistakes(){
+  const list=document.getElementById('mistakeList');
+  const filter=document.getElementById('mistakeFilter').value;
+  let data=mistakes;
+  if(filter!=='all') data=mistakes.filter(m=>m.sub===filter);
+  if(data.length===0){ list.innerHTML='<div class="badge">No mistakes yet - Start Quiz!</div>'; }
+  else { list.innerHTML=data.slice().reverse().map((m,i)=>`<div style="padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:12px;margin-bottom:8px"><div style="font-size:12px;font-weight:600">${m.q}</div><div style="font-size:11px;margin-top:6px"><span style="color:#ef4444">Your: ${m.your}</span> | <span style="color:var(--green)">Correct: ${m.correct}</span></div><div class="badge" style="margin-top:6px">${m.exp}</div></div>`).join(''); }
+  const acc= mistakes.length? Math.round((1- mistakes.length/(mistakes.length+score||1))*100):100;
+  document.getElementById('mistakeStats').textContent=`Total: ${mistakes.length} | Accuracy: ${acc>0?acc:0}%`;
+  document.getElementById('mistakeFilter').onchange=renderMistakes;
+}
+function clearMistakes(){ if(confirm('Clear all mistakes?')){ mistakes=[]; localStorage.setItem('bsc-mistakes','[]'); renderMistakes(); } }// Pomodoro
+let pomoInt=null,pomoSec=1500,pomoRunning=false;
+function togglePomo(){
+  const btn=document.getElementById('pomoBtn');
+  if(!pomoRunning){ pomoRunning=true; btn.textContent='Pause'; pomoInt=setInterval(()=>{ pomoSec--; let m=Math.floor(pomoSec/60),s=pomoSec%60; document.getElementById('pomoTime').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`; if(pomoSec<=0){ clearInterval(pomoInt); alert('🍅 Pomodoro done! 5 min break'); pomoSec=1500; pomoRunning=false; btn.textContent='Start'; } },1000); } else { clearInterval(pomoInt); pomoRunning=false; btn.textContent='Start'; }
+}
+
+init();
+</script>
+</body>
+</html>

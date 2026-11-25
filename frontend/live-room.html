@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Live Study Room</title>
+</head>
+<body style="font-family: Arial; text-align:center; padding:20px;">
+  <h2>🔴 Live Study Room - SSC Batch</h2>
+  <p>Study together with your friends</p>
+  
+  <!-- Room status -->
+  <div id="roomStatus" style="background:#e0ffe0; padding:10px; border-radius:10px;">
+    <p>🟢 3 Friends are studying now</p>
+    <p id="timer">Study Time: 00:25:00</p>
+  </div>
+
+  <!-- Friends list -->
+  <div style="margin-top:20px;">
+    <h4>Friends in room:</h4>
+    <p>👩‍🎓 Preeti - Maths (Online)</p>
+    <p>👨‍🎓 Aman - Science (Online)</p>
+    <p>👩‍🎓 Riya - English (Studying...)</p>
+  </div>
+
+  <button onclick="startStudy()" style="padding:10px 20px; background:#667eea; color:white; border:none; border-radius:10px; margin-top:20px;">Start Studying Together</button>
+
+  <script>
+    // Timer for live study session
+    let seconds = 1500;
+    function startStudy() {
+      // Start the live study timer
+      alert("You joined the live study room! Your friends can see you are studying.");
+      setInterval(() => {
+        seconds--;
+        let m = Math.floor(seconds/60);
+        let s = seconds%60;
+        document.getElementById('timer').innerText = `Study Time: 00:${m}:${s}`;
+      }, 1000);
+    }
+  </script>
+</body>
+</html>

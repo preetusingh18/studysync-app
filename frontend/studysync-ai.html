@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Study Sync - BSc CS PRO MAX (Gemini AI)</title>
+<style>
+  :root{
+    --bg:#0b0f1a; --card:rgba(255,255,255,0.06); --border:rgba(255,255,255,0.12);
+    --text:#e8ecf5; --muted:#9aa4b8; --a1:#00e5ff; --a2:#a855f7; --ok:#22c55e; --bad:#ef4444; --warn:#f59e0b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:radial-gradient(circle at 20% 0%,#1a1440 0%,var(--bg) 55%);color:var(--text);min-height:100vh;padding:16px}
+  .wrap{max-width:980px;margin:0 auto}
+  header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+  h1{font-size:1.5rem;background:linear-gradient(90deg,var(--a1),var(--a2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{color:var(--muted);font-size:.85rem}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;backdrop-filter:blur(12px);margin-bottom:14px}
+  .tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+  .tab{padding:10px 6px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-weight:600;font-size:.9rem}
+  .tab.active{background:linear-gradient(90deg,var(--a1),var(--a2));color:#0b0f1a;border-color:transparent}
+  .panel{display:none}.panel.active{display:block}
+  label{display:block;font-size:.85rem;color:var(--muted);margin:8px 0 4px}
+  input,select,textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:rgba(0,0,0,.35);color:var(--text);font-size:.95rem;font-family:inherit}
+  textarea{min-height:120px;resize:vertical}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}
+  .row>*{flex:1;min-width:140px}
+  button.btn{padding:10px 16px;border:none;border-radius:10px;cursor:pointer;font-weight:700;background:linear-gradient(90deg,var(--a1),var(--a2));color:#0b0f1a;font-size:.95rem}
+  button.btn:disabled{opacity:.5;cursor:not-allowed}
+  button.ghost{background:transparent;color:var(--text);border:1px solid var(--border)}
+  .output{white-space:normal;line-height:1.65;margin-top:12px;font-size:.95rem}
+  .output h2,.output h3,.output h4{color:var(--a1);margin:14px 0 6px}
+  .output pre{background:#05070d;border:1px solid var(--border);padding:12px;border-radius:10px;overflow-x:auto;margin:8px 0;white-space:pre}
+  .output code{font-family:Consolas,monospace;font-size:.88rem}
+  .output :not(pre)>code{background:rgba(255,255,255,.1);padding:1px 5px;border-radius:4px}
+  .output ul,.output ol{padding-left:22px;margin:6px 0}
+  .output p{margin:6px 0}
+  .status{font-size:.85rem;margin-top:6px}
+  .pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:.75rem;font-weight:700}
+  .pill.on{background:rgba(34,197,94,.15);color:var(--ok)} .pill.off{background:rgba(245,158,11,.15);color:var(--warn)}
+  .progress{height:12px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden;margin:8px 0}
+  .bar{height:100%;width:0;background:linear-gradient(90deg,var(--a1),var(--a2));transition:width .4s}
+  .syl{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dashed var(--border)}
+  .syl input{width:auto}
+  .opt{display:block;width:100%;text-align:left;padding:12px;margin:6px 0;border-radius:10px;border:1px solid var(--border);background:rgba(0,0,0,.3);color:var(--text);cursor:pointer;font-size:.95rem}
+  .opt:hover{border-color:var(--a1)}
+  .opt.correct{background:rgba(34,197,94,.2);border-color:var(--ok)}
+  .opt.wrong{background:rgba(239,68,68,.2);border-color:var(--bad)}
+  .qhead{display:flex;justify-content:space-between;color:var(--muted);font-size:.85rem;margin-bottom:8px}
+  .timer{font-weight:800;color:var(--a1)}
+  .chat{max-height:420px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;margin:10px 0}
+  .msg{padding:10px 14px;border-radius:12px;max-width:90%}
+  .msg.user{align-self:flex-end;background:linear-gradient(90deg,rgba(0,229,255,.2),rgba(168,85,247,.2))}
+  .msg.bot{align-self:flex-start;background:rgba(255,255,255,.06);border:1px solid var(--border)}
+  .loader{display:inline-block;width:16px;height:16px;border:2px solid var(--muted);border-top-color:var(--a1);border-radius:50%;animation:spin 1s linear infinite;vertical-align:middle}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .hide{display:none}
+  a{color:var(--a1)}
+  @media(max-width:600px){.tabs{grid-template-columns:repeat(2,1fr)} h1{font-size:1.2rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div>
+    <h1>Study Sync - BSc CS PRO MAX</h1>
+    <div class="sub">Gemini AI powered notes, quiz aur doubt solver</div>
+  </div>
+  <div>AI: <span id="aiStatus" class="pill off">Offline mode</span></div>
+</header>
+
+<!-- ============ API KEY SETTINGS ============ -->
+<div class="card">
+  <details id="keyBox">
+    <summary style="cursor:pointer;font-weight:700">Gemini API Key setting (free)</summary>
+    <p class="sub" style="margin-top:8px">Free key yahan se banayein: <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a> → "Create API key" → copy karke niche paste karein. Key sirf aapke browser (localStorage) me save hogi.</p>
+    <div class="row" style="margin-top:8px">
+      <div style="flex:3"><input id="apiKey" type="password" placeholder="AIza... apni key yahan paste karein"></div>
+      <button class="btn" onclick="saveKey()">Save & Test</button>
+      <button class="btn ghost" onclick="clearKey()">Remove</button>
+    </div>
+    <label>Model</label>
+    <select id="modelSel" onchange="localStorage.setItem('ss_model',this.value)">
+      <option value="gemini-2.5-flash">gemini-2.5-flash (recommended)</option>
+      <option value="gemini-3.5-flash">gemini-3.5-flash</option>
+      <option value="gemini-2.5-flash">gemini-2.5-flash</option>
+      <option value="gemini-2.0-flash">gemini-2.0-flash</option>
+    </select>
+    <div id="keyMsg" class="status"></div>
+  </details>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab(0)">Notes Gen</button>
+  <button class="tab" onclick="showTab(1)">Shared Notes</button>
+  <button class="tab" onclick="showTab(2)">Quiz Battle</button>
+  <button class="tab" onclick="showTab(3)">Doubt Solver</button>
+</div>
+
+<!-- ============ TAB 1: NOTES ============ -->
+<div class="panel active card">
+  <div class="row">
+    <div>
+      <label>Topic chunein</label>
+      <select id="topicSel"></select>
+    </div>
+    <div>
+      <label>Ya apna topic likhein</label>
+      <input id="customTopic" placeholder="e.g. Deadlock in OS">
+    </div>
+  </div>
+  <div class="row">
+    <div>
+      <label>Language</label>
+      <select id="notesLang">
+        <option value="Hinglish (Hindi in Roman script mixed with English)">Hinglish</option>
+        <option value="English">English</option>
+        <option value="Hindi (Devanagari)">Hindi</option>
+      </select>
+    </div>
+    <div>
+      <label>Marks type</label>
+      <select id="notesMarks">
+        <option value="5 marks">5 marks</option>
+        <option value="10 marks" selected>10 marks</option>
+        <option value="short revision">Short revision</option>
+      </select>
+    </div>
+  </div>
+  <div class="row" style="margin-top:12px">
+    <button class="btn" id="genBtn" onclick="generateNotes()">Generate Notes</button>
+    <button class="btn ghost" onclick="copyText('notesOutput')">Copy</button>
+    <button class="btn ghost" onclick="downloadNotes()">Download (.txt)</button>
+    <button class="btn ghost" onclick="sendToShared()">Shared Notes me daalein</button>
+  </div>
+  <div id="notesOutput" class="output"></div>
+</div>
+
+<!-- ============ TAB 2: SHARED NOTES & SYLLABUS ============ -->
+<div class="panel card">
+  <label>Shared Notes (auto save)</label>
+  <textarea id="sharedNotes" oninput="localStorage.setItem('ss_shared',this.value)" placeholder="Yahan notes likhein..."></textarea>
+  <div class="row" style="margin-top:8px">
+    <button class="btn ghost" onclick="insertTemplate('c')">C Template</button>
+    <button class="btn ghost" onclick="insertTemplate('java')">Java Template</button>
+    <button class="btn ghost" onclick="insertTemplate('sql')">SQL Template</button>
+    <button class="btn" onclick="improveShared()">AI se Summarize / Improve</button>
+  </div>
+  <div id="sharedOutput" class="output"></div>
+
+  <h3 style="margin-top:20px">Syllabus Progress</h3>
+  <div class="progress"><div class="bar" id="sylBar"></div></div>
+  <div id="sylText" class="sub"></div>
+  <div id="sylList"></div>
+</div>
+
+<!-- ============ TAB 3: QUIZ ============ -->
+<div class="panel card">
+  <div id="quizSetup">
+    <div class="row">
+      <div><label>Quiz topic</label><input id="quizTopic" placeholder="e.g. DBMS Normalization, C Pointers"></div>
+      <div><label>Sawal</label>
+        <select id="quizCount"><option>5</option><option selected>10</option><option>15</option></select></div>
+      <div><label>Level</label>
+        <select id="quizLevel"><option>easy</option><option selected>medium</option><option>hard</option></select></div>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn" id="quizBtn" onclick="startQuiz()">AI Quiz Start</button>
+      <button class="btn ghost" onclick="startQuiz(true)">Offline Quiz</button>
+      <button class="btn ghost" onclick="showMistakes()">Meri Mistakes</button>
+    </div>
+    <div id="quizMsg" class="status"></div>
+  </div>
+  <div id="quizArea" class="hide">
+    <div class="qhead"><span id="qNum"></span><span>Score: <b id="score">0</b></span><span class="timer" id="timer">30s</span></div>
+    <h3 id="qText" style="margin-bottom:8px"></h3>
+    <div id="opts"></div>
+    <div id="explain" class="output"></div>
+    <button class="btn hide" id="nextBtn" onclick="nextQ()" style="margin-top:10px">Next</button>
+  </div>
+  <div id="mistakeArea" class="output"></div>
+</div>
+
+<!-- ============ TAB 4: DOUBT SOLVER ============ -->
+<div class="panel card">
+  <div class="chat" id="chat">
+    <div class="msg bot">Namaste. Apna BSc CS ka koi bhi doubt poochiye — C, Java, DBMS, OS, DSA, Networks, Python...</div>
+  </div>
+  <div class="row">
+    <div style="flex:4"><textarea id="doubtInput" style="min-height:60px" placeholder="Apna doubt likhein... (Ctrl+Enter se bhejein)"></textarea></div>
+    <button class="btn" id="doubtBtn" onclick="solveDoubt()">Solve</button>
+  </div>
+  <button class="btn ghost" style="margin-top:8px" onclick="clearChat()">Chat clear</button>
+</div>
+
+</div>
+
+<script>
+/* =====================================================
+   1. GEMINI AI HELPER
+   ===================================================== */
+function getKey(){ return localStorage.getItem('ss_key') || ''; }
+
+async function askGemini(prompt, opts = {}){function getModel(){ return localStorage.getItem('ss_model') || 'gemini-2.5-flash'; }
+  const key = getKey();
+  if(!key) throw new Error('NO_KEY');
+  const body = {
+    contents: opts.history ? opts.history : [{ role:'user', parts:[{ text: prompt }] }],
+    generationConfig: { temperature: opts.temperature ?? 0.7 }
+  };
+  if(opts.system) body.systemInstruction = { parts:[{ text: opts.system }] };
+  if(opts.json) body.generationConfig.responseMimeType = 'application/json';
+
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${getModel()}:generateContent`;
+  const res = await fetch(url, {
+    method:'POST',
+    headers:{ 'Content-Type':'application/json', 'x-goog-api-key': key },
+    body: JSON.stringify(body)
+  });
+  const data = await res.json();
+  if(!res.ok){
+    const m = data?.error?.message || res.statusText;
+    if(res.status === 429) throw new Error('Free limit khatam (429). 1 minute baad try karein.');
+    if(res.status === 400 && /API key/i.test(m)) throw new Error('API key galat hai. Settings me sahi key daalein.');
+    if(res.status === 404) throw new Error('Model nahi mila. Settings me dusra model chunein.');
+    throw new Error(m);
+  }
+  const text = data?.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('') || '';
+  if(!text) throw new Error('AI ne khali jawab diya, dobara try karein.');
+  return text;
+}
+
+function updateStatus(){
+  const el = document.getElementById('aiStatus');
+  if(getKey()){ el.textContent = 'Gemini AI ON'; el.className = 'pill on'; }
+  else { el.textContent = 'Offline mode'; el.className = 'pill off'; }
+}
+
+async function saveKey(){
+  const k = document.getElementById('apiKey').value.trim();
+  const msg = document.getElementById('keyMsg');
+  if(!k){ msg.textContent = 'Pehle key paste karein.'; return; }
+  localStorage.setItem('ss_key', k);
+  msg.innerHTML = '<span class="loader"></span> Test ho raha hai...';
+  try{
+    await askGemini('Reply with just: OK');
+    msg.innerHTML = '<span style="color:var(--ok)">Key kaam kar rahi hai. AI ON ho gaya.</span>';
+  }catch(e){
+    msg.innerHTML = '<span style="color:var(--bad)">Error: ' + esc(e.message) + '</span>';
+  }
+  updateStatus();
+}
+function clearKey(){ localStorage.removeItem('ss_key'); document.getElementById('apiKey').value=''; updateStatus(); document.getElementById('keyMsg').textContent='Key hata di gayi.'; }
+
+/* Simple Markdown -> HTML (safe) */
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function md(src){
+  const blocks = [];
+  src = src.replace(/```(\w*)\n?([\s\S]*?)```/g, (_, l, code) => { blocks.push(code); return `\u0000${blocks.length-1}\u0000`; });
+  let html = esc(src)
+    .replace(/^#### (.*)$/gm,'<h4>$1</h4>')
+    .replace(/^### (.*)$/gm,'<h3>$1</h3>')
+    .replace(/^## (.*)$/gm,'<h2>$1</h2>')
+    .replace(/^# (.*)$/gm,'<h2>$1</h2>')
+    .replace(/\*\*(.+?)\*\*/g,'<b>$1</b>')
+    .replace(/`([^`]+)`/g,'<code>$1</code>')
+    .replace(/^\s*[-*] (.*)$/gm,'<li>$1</li>')
+    .replace(/^\s*\d+\. (.*)$/gm,'<li>$1</li>')
+    .replace(/(<li>.*<\/li>\n?)+/g, m => '<ul>' + m + '</ul>')
+    .replace(/\n{2,}/g,'</p><p>')
+    .replace(/\n/g,'<br>');
+  html = html.replace(/\u0000(\d+)\u0000/g, (_, i) => '<pre><code>' + esc(blocks[i]) + '</code></pre>');
+  return '<p>' + html + '</p>';
+}
+
+/* =====================================================
+   2. TABS
+   ===================================================== */
+function showTab(i){
+  document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active', i===j));
+  document.querySelectorAll('.panel').forEach((p,j)=>p.classList.toggle('active', i===j));
+}
+
+/* =====================================================
+   3. NOTES GENERATOR
+   ===================================================== */
+const topics = ["C Pointers","C Arrays & Strings","Java OOPs Concepts","Java Inheritance","Java Exception Handling",
+  "DBMS Normalization","SQL Joins","DBMS ACID Properties","OS Process Scheduling","OS Deadlock","Paging & Segmentation",
+  "Data Structures - Linked List","Stack & Queue","Sorting Algorithms","Binary Tree & BST","Computer Networks OSI Model",
+  "TCP/IP Model","Python Basics","Digital Electronics - Logic Gates","Software Engineering SDLC"];
+document.getElementById('topicSel').innerHTML = topics.map(t=>`<option>${t}</option>`).join('');
+
+const notesDB = {
+  "C Pointers": "## C Pointers\n**Definition:** Pointer ek variable hai jo dusre variable ka address store karta hai.\n\n### Theory\n- `&` address of operator\n- `*` dereference operator\n- Pointer arithmetic: p++ next element par jata hai\n\n### Code\n```c\n#include <stdio.h>\nint main(){\n  int a = 10;\n  int *p = &a;\n  printf(\"%d\", *p);\n  return 0;\n}\n```\n### Viva\n1. NULL pointer kya hai?\n2. Dangling pointer kya hai?"
+};
+
+async function generateNotes(){
+  const out = document.getElementById('notesOutput');
+  const btn = document.getElementById('genBtn');
+  const topic = document.getElementById('customTopic').value.trim() || document.getElementById('topicSel').value;
+  const lang = document.getElementById('notesLang').value;
+  const marks = document.getElementById('notesMarks').value;
+  out.innerHTML = '<span class="loader"></span> Notes ban rahe hai...';
+  btn.disabled = true;
+  try{
+    const prompt = `Topic: "${topic}" (BSc Computer Science, Indian university exam).
+Write exam-ready notes for a ${marks} answer in ${lang}.
+Use this exact structure with markdown headings:
+## ${topic}
+### Definition
+### Detailed Theory (with points)
+### Diagram / Example (text based)
+### Code Example (if relevant, C/Java/Python/SQL with comments)
+### Advantages & Disadvantages (if relevant)
+### Important Exam Points
+### Viva Questions (5 with short answers)`;
+    const text = await askGemini(prompt, { system: 'You are an expert BSc CS professor who writes clear, accurate, exam-oriented notes for Indian students.' });
+    out.innerHTML = md(text);
+    out.dataset.raw = text;
+  }catch(e){
+    const fallback = notesDB[topic] || `## ${topic}\n### Definition\n${topic} BSc CS ka important topic hai.\n### Theory\n- Basic concept samjhein\n- Working aur types likhein\n### Viva\n1. ${topic} kya hai?\n2. Iske types batayein.`;
+    const note = e.message === 'NO_KEY' ? 'Offline notes dikh rahe hai. Asli AI notes ke liye upar Gemini API key daalein.' : 'AI error: ' + e.message + ' (offline notes dikh rahe hai)';
+    out.innerHTML = `<div class="status" style="color:var(--warn)">${esc(note)}</div>` + md(fallback);
+    out.dataset.raw = fallback;
+  }finally{ btn.disabled = false; }
+}
+
+function copyText(id){
+  const raw = document.getElementById(id).dataset.raw || document.getElementById(id).innerText;
+  navigator.clipboard.writeText(raw).then(()=>alert('Copy ho gaya'));
+}
+function downloadNotes(){
+  const raw = document.getElementById('notesOutput').dataset.raw;
+  if(!raw){ alert('Pehle notes generate karein'); return; }
+  const blob = new Blob([raw], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = 'StudySync_Notes.txt'; a.click();
+}
+function sendToShared(){
+  const raw = document.getElementById('notesOutput').dataset.raw;
+  if(!raw) return;
+  const ta = document.getElementById('sharedNotes');
+  ta.value += '\n\n' + raw; localStorage.setItem('ss_shared', ta.value);
+  showTab(1);
+}
+
+/* =====================================================
+   4. SHARED NOTES & SYLLABUS
+   ===================================================== */
+const templates = {
+  c: "#include <stdio.h>\n\nint main() {\n    // code yahan\n    return 0;\n}\n",
+  java: "public class Main {\n    public static void main(String[] args) {\n        // code yahan\n    }\n}\n",
+  sql: "CREATE TABLE Student (\n  id INT PRIMARY KEY,\n  name VARCHAR(50),\n  marks INT\n);\nSELECT * FROM Student WHERE marks > 60;\n"
+};
+function insertTemplate(t){
+  const ta = document.getElementById('sharedNotes');
+  ta.value += '\n' + templates[t]; localStorage.setItem('ss_shared', ta.value);
+}
+async function improveShared(){
+  const text = document.getElementById('sharedNotes').value.trim();
+  const out = document.getElementById('sharedOutput');
+  if(!text){ out.textContent = 'Pehle kuch notes likhein.'; return; }
+  out.innerHTML = '<span class="loader"></span> AI padh raha hai...';
+  try{
+    const r = await askGemini(`Ye mere BSc CS ke notes hai. Inhe saaf, organized exam notes me badlo (Hinglish), galtiyan theek karo, aur last me 5 important points do:\n\n${text}`);
+    out.innerHTML = md(r);
+  }catch(e){ out.textContent = e.message === 'NO_KEY' ? 'Is feature ke liye Gemini API key chahiye.' : 'Error: ' + e.message; }
+}
+
+const syllabusData = ["C Programming","Data Structures","DBMS","Operating System","Computer Networks","Java (OOPs)","Python","Software Engineering","Digital Electronics","Discrete Maths"];
+let sylDone = JSON.parse(localStorage.getItem('ss_syl') || '[]');
+function renderSyllabus(){
+  document.getElementById('sylList').innerHTML = syllabusData.map((s,i)=>
+    `<label class="syl"><input type="checkbox" ${sylDone.includes(i)?'checked':''} onchange="toggleSyl(${i})"> ${s}</label>`).join('');
+  const pct = Math.round(sylDone.length / syllabusData.length * 100);
+  document.getElementById('sylBar').style.width = pct + '%';
+  document.getElementById('sylText').textContent = `${sylDone.length}/${syllabusData.length} subjects complete (${pct}%)`;
+}
+function toggleSyl(i){
+  sylDone = sylDone.includes(i) ? sylDone.filter(x=>x!==i) : [...sylDone, i];
+  localStorage.setItem('ss_syl', JSON.stringify(sylDone)); renderSyllabus();
+}
+
+/* =====================================================
+   5. QUIZ BATTLE
+   ===================================================== */
+const quizBank = [
+  {q:"C me pointer ka size 64-bit system par usually kitna hota hai?", options:["2 bytes","4 bytes","8 bytes","16 bytes"], answer:2, explanation:"64-bit system par address 8 bytes ka hota hai."},
+  {q:"Java me multiple inheritance kis se achieve hoti hai?", options:["Class","Interface","Package","Object"], answer:1, explanation:"Java classes multiple inheritance support nahi karti, interfaces karte hai."},
+  {q:"Primary key ki property kya hai?", options:["NULL ho sakti hai","Duplicate ho sakti hai","Unique aur NOT NULL","Sirf number"], answer:2, explanation:"Primary key unique aur NOT NULL hoti hai."},
+  {q:"Stack kis principle par kaam karta hai?", options:["FIFO","LIFO","Random","Priority"], answer:1, explanation:"Stack Last In First Out hai."},
+  {q:"OSI model me kitni layers hai?", options:["5","6","7","4"], answer:2, explanation:"OSI model me 7 layers hai."},
+  {q:"Binary search ki time complexity?", options:["O(n)","O(log n)","O(n²)","O(1)"], answer:1, explanation:"Har step me array aadha hota hai, isliye O(log n)."},
+  {q:"Deadlock ki kitni necessary conditions hai?", options:["2","3","4","5"], answer:2, explanation:"Mutual exclusion, hold & wait, no preemption, circular wait."},
+  {q:"SQL me duplicate rows hatane ke liye?", options:["UNIQUE","DISTINCT","DELETE","GROUP"], answer:1, explanation:"SELECT DISTINCT duplicate hata deta hai."}
+];
+let quiz = [], qi = 0, score = 0, timerId = null, timeLeft = 30, quizTopicName = '';
+let mistakes = JSON.parse(localStorage.getItem('ss_mistakes') || '[]');
+
+async function startQuiz(offline = false){
+  const msg = document.getElementById('quizMsg');
+  const btn = document.getElementById('quizBtn');
+  const topic = document.getElementById('quizTopic').value.trim() || 'BSc Computer Science mixed (C, Java, DBMS, OS, DSA, Networks)';
+  const count = +document.getElementById('quizCount').value;
+  const level = document.getElementById('quizLevel').value;
+  quizTopicName = topic;
+  document.getElementById('mistakeArea').innerHTML = '';
+
+  if(offline || !getKey()){
+    if(!offline) msg.innerHTML = '<span style="color:var(--warn)">API key nahi hai, offline quiz chal raha hai.</span>';
+    quiz = [...quizBank].sort(()=>Math.random()-0.5);
+    return beginQuiz();
+  }
+  msg.innerHTML = '<span class="loader"></span> AI quiz bana raha hai...';
+  btn.disabled = true;
+  try{
+    const prompt = `Create ${count} ${level} level multiple choice questions on "${topic}" for BSc Computer Science students (Indian university exams).
+Return ONLY a JSON array. Each item: {"q": "question text", "options": ["A","B","C","D"], "answer": index_of_correct_option_0_to_3, "explanation": "short reason in Hinglish"}.
+Questions must be factually correct, exactly 4 options, only one correct answer.`;
+    const raw = await askGemini(prompt, { json:true, temperature:0.9 });
+    let arr = JSON.parse(raw.replace(/```json|```/g,'').trim());
+    if(!Array.isArray(arr)) arr = arr.questions || [];
+    quiz = arr.filter(x => x.q && Array.isArray(x.options) && x.options.length >= 2 && Number.isInteger(+x.answer))
+              .map(x => ({...x, answer:+x.answer}));
+    if(!quiz.length) throw new Error('Quiz format galat aaya, dobara try karein.');
+    msg.textContent = '';
+    beginQuiz();
+  }catch(e){
+    msg.innerHTML = '<span style="color:var(--bad)">' + esc(e.message) + ' — offline quiz chal raha hai.</span>';
+    quiz = [...quizBank].sort(()=>Math.random()-0.5);
+    beginQuiz();
+  }finally{ btn.disabled = false; }
+}
+
+function beginQuiz(){
+  qi = 0; score = 0;
+  document.getElementById('score').textContent = 0;
+  document.getElementById('quizArea').classList.remove('hide');
+  renderQuestion();
+}
+
+function renderQuestion(){
+  clearInterval(timerId);
+  const q = quiz[qi];
+  document.getElementById('qNum').textContent = `Q ${qi+1}/${quiz.length}`;
+  document.getElementById('qText').textContent = q.q;
+  document.getElementById('explain').innerHTML = '';
+  document.getElementById('nextBtn').classList.add('hide');
+  document.getElementById('opts').innerHTML = q.options.map((o,i)=>`<button class="opt" onclick="checkAns(${i})">${String.fromCharCode(65+i)}. ${esc(o)}</button>`).join('');
+  timeLeft = 30; document.getElementById('timer').textContent = '30s';
+  timerId = setInterval(()=>{
+    timeLeft--; document.getElementById('timer').textContent = timeLeft + 's';
+    if(timeLeft <= 0){ clearInterval(timerId); checkAns(-1); }
+  }, 1000);
+}
+
+function checkAns(i){
+  clearInterval(timerId);
+  const q = quiz[qi];
+  const btns = document.querySelectorAll('#opts .opt');
+  btns.forEach(b => b.disabled = true);
+  btns[q.answer]?.classList.add('correct');
+  if(i === q.answer){
+    score++; document.getElementById('score').textContent = score;
+  }else{
+    if(i >= 0) btns[i].classList.add('wrong');
+    mistakes.push({ q:q.q, your: i>=0 ? q.options[i] : 'Time out', correct:q.options[q.answer], topic:quizTopicName });
+    mistakes = mistakes.slice(-50);
+    localStorage.setItem('ss_mistakes', JSON.stringify(mistakes));
+  }
+  document.getElementById('explain').innerHTML = q.explanation ? '<b>Explanation:</b> ' + esc(q.explanation) : '';
+  const nb = document.getElementById('nextBtn');
+  nb.textContent = qi === quiz.length-1 ? 'Result dekhein' : 'Next';
+  nb.classList.remove('hide');
+}
+
+function nextQ(){
+  if(qi < quiz.length-1){ qi++; renderQuestion(); return; }
+  document.getElementById('quizArea').classList.add('hide');
+  const pct = Math.round(score/quiz.length*100);
+  document.getElementById('quizMsg').innerHTML = `<h3>Quiz khatam. Score: ${score}/${quiz.length} (${pct}%)</h3>`;
+}
+
+async function showMistakes(){
+  const area = document.getElementById('mistakeArea');
+  if(!mistakes.length){ area.innerHTML = '<p>Abhi koi mistake save nahi hai.</p>'; return; }
+  area.innerHTML = '<h3>Meri Mistakes</h3>' + mistakes.slice(-10).map(m=>
+    `<p><b>Q:</b> ${esc(m.q)}<br><span style="color:var(--bad)">Aapka: ${esc(m.your)}</span> | <span style="color:var(--ok)">Sahi: ${esc(m.correct)}</span></p>`).join('') +
+    `<button class="btn" onclick="explainMistakes()">AI se samjhein</button> <button class="btn ghost" onclick="mistakes=[];localStorage.removeItem('ss_mistakes');showMistakes()">Clear</button><div id="mistakeAI" class="output"></div>`;
+}
+async function explainMistakes(){
+  const box = document.getElementById('mistakeAI');
+  box.innerHTML = '<span class="loader"></span> AI samjha raha hai...';
+  try{
+    const list = mistakes.slice(-10).map((m,i)=>`${i+1}. Q: ${m.q} | Student answer: ${m.your} | Correct: ${m.correct}`).join('\n');
+    const r = await askGemini(`Student ne ye sawal galat kiye. Har ek ka sahi concept short me Hinglish me samjhao aur last me weak topics + revision tips do:\n${list}`);
+    box.innerHTML = md(r);
+  }catch(e){ box.textContent = e.message === 'NO_KEY' ? 'Is feature ke liye API key chahiye.' : 'Error: ' + e.message; }
+}
+
+/* =====================================================
+   6. DOUBT SOLVER (chat with memory)
+   ===================================================== */
+const doubtsDB = {
+  "pointer": "Pointer ek variable hai jo dusre variable ka memory address store karta hai. Example: int *p = &a;",
+  "normalization": "Normalization data redundancy kam karne ki process hai. 1NF, 2NF, 3NF, BCNF iske forms hai.",
+  "deadlock": "Deadlock tab hota hai jab do ya zyada process ek dusre ke resource ka wait karte rehte hai. 4 conditions: Mutual Exclusion, Hold & Wait, No Preemption, Circular Wait.",
+  "oops": "OOPs ke 4 pillars: Encapsulation, Inheritance, Polymorphism, Abstraction.",
+  "recursion": "Recursion me function khud ko call karta hai. Base condition zaroori hai warna stack overflow hoga."
+};
+let chatHistory = [];
+
+function addMsg(html, who){
+  const d = document.createElement('div');
+  d.className = 'msg ' + who; d.innerHTML = html;
+  const c = document.getElementById('chat'); c.appendChild(d); c.scrollTop = c.scrollHeight;
+  return d;
+}
+
+async function solveDoubt(){
+  const inp = document.getElementById('doubtInput');
+  const q = inp.value.trim();
+  if(!q) return;
+  inp.value = '';
+  addMsg(esc(q), 'user');
+  const wait = addMsg('<span class="loader"></span> Soch raha hoon...', 'bot');
+  const btn = document.getElementById('doubtBtn'); btn.disabled = true;
+  chatHistory.push({ role:'user', parts:[{ text:q }] });
+  try{
+    const ans = await askGemini('', {
+      history: chatHistory.slice(-10),
+      system: 'You are a friendly BSc Computer Science tutor for Indian students. Answer in the same language the student uses (Hinglish if mixed). Explain step by step with simple examples, give code when useful, and end with 1-2 exam tips. Keep it concise.'
+    });
+    chatHistory.push({ role:'model', parts:[{ text:ans }] });
+    wait.innerHTML = md(ans);
+  }catch(e){
+    chatHistory.pop();
+    const lower = q.toLowerCase();
+    const key = Object.keys(doubtsDB).find(k => lower.includes(k));
+    const base = key ? doubtsDB[key] : 'Is doubt ka ready answer offline database me nahi hai.';
+    const note = e.message === 'NO_KEY' ? 'Har doubt ka AI answer pane ke liye upar Gemini API key daalein.' : 'AI error: ' + e.message;
+    wait.innerHTML = esc(base) + `<div class="status" style="color:var(--warn)">${esc(note)}</div>`;
+  }finally{ btn.disabled = false; }
+}
+function clearChat(){ chatHistory = []; document.getElementById('chat').innerHTML = '<div class="msg bot">Chat clear ho gaya. Naya doubt poochiye.</div>'; }
+document.getElementById('doubtInput').addEventListener('keydown', e => { if(e.key === 'Enter' && e.ctrlKey) solveDoubt(); });
+
+/* =====================================================
+   7. INIT
+   ===================================================== */
+document.getElementById('sharedNotes').value = localStorage.getItem('ss_shared') || '';
+document.getElementById('apiKey').value = getKey();
+document.getElementById('modelSel').value = getModel();
+if(!getKey()) document.getElementById('keyBox').open = true;
+renderSyllabus();
+updateStatus();
+</script>
+</body>
+</html>

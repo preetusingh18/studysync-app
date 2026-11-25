@@ -1,0 +1,18 @@
+<!DOCTYPE html><html><head><title>Groups</title>
+<style>body{font-family:sans-serif;background:#f0f2ff;margin:0}.header{background:white;padding:12px;display:flex;justify-content:space-between}.card{background:white;margin:15px;padding:15px;border-radius:12px}.msg{background:#f3f4ff;padding:8px;border-radius:8px;margin:5px 0}.btn{background:#4e54c8;color:white;border:none;padding:8px 12px;border-radius:8px;cursor:pointer}</style>
+</head><body>
+<div class="header"><b id="gName">Group</b><a href="dashboard.html"><button class="btn" style="background:grey;">Back</button></a></div>
+<div class="card">
+<div id="chatBox" style="height:320px;overflow-y:auto;border:1px solid #ddd;padding:10px;border-radius:8px;"></div>
+<div style="display:flex;gap:8px;margin-top:10px;">
+<input id="msgInput" placeholder="Message likho..." style="flex:1;padding:8px;border-radius:8px;border:1px solid #ccc;">
+<button class="btn" onclick="sendMsg()">Send</button>
+</div></div>
+<script>
+let currentGroup = localStorage.getItem('current_group') || 'APSU BCA 2nd Year';
+document.getElementById('gName').innerText = '📚 ' + currentGroup;
+let chats = JSON.parse(localStorage.getItem('chat_'+currentGroup) || '[]');
+function render(){ document.getElementById('chatBox').innerHTML = chats.map(c=>`<div class="msg"><b>${c.user}:</b> ${c.text}</div>`).join(''); }
+function sendMsg(){ let t=document.getElementById('msgInput').value; if(!t) return; chats.push({user:'Preetu', text:t}); localStorage.setItem('chat_'+currentGroup, JSON.stringify(chats)); document.getElementById('msgInput').value=''; render(); }
+render();
+</script></body></html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Universal Notes to Quiz - Professional</title>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<style>
+body{margin:0;font-family:Inter,Arial;background:#0c0e16;color:#e8e8e8;padding:16px}
+.card{background:#151821;border:1px solid #24283a;border-radius:14px;padding:18px;margin:14px 0}
+textarea,input{width:97%;padding:12px;border-radius:10px;border:1px solid #2a2e44;background:#0f111a;color:white}
+button{background:#5b6cf6;color:white;border:none;padding:11px 18px;border-radius:10px;font-weight:600;cursor:pointer;margin:4px}
+button.secondary{background:#23263a;border:1px solid #3a3f5c}
+.option{background:#1e2235;padding:12px;margin:8px 0;border-radius:10px;cursor:pointer;border:1px solid #2a2e44}
+.option.correct{background:#16a34a !important} .option.wrong{background:#dc2626 !important}
+.qbox{background:#0f111a;padding:14px;border-radius:10px;margin-bottom:16px;border:1px solid #1e2235}
+#status{color:#7aa7ff;font-size:12px}
+small{opacity:0.6}
+</style>
+</head>
+<body>
+<h2>Universal Smart Notes - Advanced Quiz Generator</h2>
+
+<div class="card">
+<h3>1. Upload Any Notes (Any Subject)</h3>
+<input type="file" id="photo" accept="image/*" multiple>
+<p id="status">You can upload 1-10 pages. For handwritten notes, please ensure clear light.</p>
+<button class="secondary" onclick="loadSample('en')">Try English Sample</button>
+<button class="secondary" onclick="loadSample('hi')">Try Hindi Sample</button>
+<button class="secondary" onclick="loadSample('science')">Try Science Sample</button>
+</div>
+
+<div class="card">
+<h3>2. Extracted Text - You Can Edit</h3>
+<small>If text has garbage like 'a a', delete that line. Clean text = Best quiz.</small>
+<textarea id="noteText" rows="9" placeholder="Your notes text will appear here..."></textarea><br>
+<button onclick="makeUniversalQuiz()">Generate Advanced Quiz (Any Subject)</button>
+</div>
+
+<div class="card" id="quizArea" style="display:none">
+<h3 id="quizTitle">Advanced Quiz</h3>
+<div id="quiz"></div>
+</div>
+
+<script>
+const SAMPLES={
+en:`Article 14 - Right to Equality. Equality before law.
+Article 19 - Right to Freedom of 6 freedoms.
+Photosynthesis is the process by which green plants make food using sunlight, carbon dioxide and water. Chlorophyll is present in leaves.`,
+hi:`अनुच्छेद 14 - समानता का अधिकार।
+प्रकाश संश्लेषण वह प्रक्रिया है जिसमें हरे पौधे सूर्य के प्रकाश से भोजन बनाते हैं।`,
+science:`Photosynthesis - Process by which plants make food using sunlight. Site is Chloroplast. Pigment is Chlorophyll. Raw materials are Carbon dioxide and Water. Product is Glucose and Oxygen. Equation: 6CO2 + 6H2O -> C6H12O6 + 6O2.`
+};
+
+function loadSample(k){
+  document.getElementById('noteText').value=SAMPLES[k];
+  document.getElementById('status').innerText=k+" sample loaded";
+}
+
+let extractedText="";
+document.getElementById('photo').addEventListener('change', async (e)=>{
+  let files=e.target.files; extractedText="";
+  document.getElementById('status').innerText=`Reading ${files.length} page(s)...`;
+  for(let i=0;i<files.length;i++){
+    document.getElementById('status').innerText=`Processing ${i+1}/${files.length}...`;
+    let r=await Tesseract.recognize(files[i],'hin+eng');
+    extractedText+="\n"+r.data.text;
+  }
+  document.getElementById('noteText').value=extractedText;
+  document.getElementById('status').innerText=`Done! Please delete any garbage lines (like 'a a', 'Ee Is') then generate.`;
+});
+
+function makeUniversalQuiz(){
+  let text=document.getElementById('noteText').value.trim();
+  if(!text){alert("Upload or paste notes"); return;}
+  let isHindi=(text.match(/[\u0900-\u097F]/g)||[]).length>20;
+  
+  // Step 1: Clean sentences - NO GARBAGE ALLOWED
+  let sentences=text.split(/[\n\.।]+/).map(s=>s.trim()).filter(s=>{
+    if(s.length<25) return false;
+    if(s.match(/\b[a-z]{1,2}\s+[a-z]{1,2}\b/i)) return false; // a a type
+    if(s.match(/Ea ee|JeTED|q q/)) return false;
+    if(!isHindi && !/^[A-Za-z0-9 ,\-()]+$/.test(s)) return false;
+    let words=(s.match(isHindi? /[\u0900-\u097F]{2,}/g : /\b[A-Za-z]{3,}\b/g)||[]).length;
+    return words>=4;
+  });
+  sentences=[...new Set(sentences)].slice(0,6);
+
+  if(sentences.length===0){alert("Text is not clear. Use sample or type clean notes."); return;}
+
+  // Collect keywords for good options
+  let keywords = [...new Set((text.match(isHindi? /[\u0900-\u097F]{3,}/g : /\b[A-Za-z]{4,}\b/g)||[]).map(w=>w.trim()).filter(w=>w.length>=4))].slice(0,30);
+  
+  let html=""; let qNo=1;
+  function addQ(question, correct, wrongs){
+    let opts=[correct, ...wrongs].sort(()=>0.5-Math.random()).slice(0,4);
+    opts=[...new Set(opts)];
+    while(opts.length<4) opts.push(keywords[Math.floor(Math.random()*keywords.length)]||"None");
+    opts=opts.sort(()=>0.5-Math.random());
+    html+=`<div class="qbox"><b>Q${qNo}: ${question}</b><br>`;
+    opts.forEach(o=>{
+      html+=`<div class="option" onclick="let a=\`${correct}\`; let ok=this.innerText.trim()===a.trim(); this.classList.add(ok?'correct':'wrong'); if(!ok){this.parentElement.querySelectorAll('.option').forEach(e=>{if(e.innerText.trim()===a.trim()) e.classList.add('correct')}) }">${o}</div>`;
+    });
+    html+=`</div>`; qNo++;
+  }
+
+  sentences.forEach(s=>{
+    let words=isHindi? (s.match(/[\u0900-\u097F]{3,}/g)||[]) : (s.match(/\b[A-Za-z]{4,}\b/g)||[]);
+    if(words.length<3) return;
+    let important = words.sort((a,b)=>b.length-a.length)[0];
+    
+    // TYPE 1: Fill in the blank
+    addQ(s.replace(important,"______")+" ?", important, keywords.filter(w=>w!==important).slice(0,3));
+    
+    // TYPE 2: Concept question - What is ...?
+    if(s.includes("is") || s.includes("है") || s.includes("-")){
+      let parts = s.split(/is|है|-/);
+      if(parts[0].length>5 && parts[1].length>5){
+        addQ(`What is ${parts[0].trim()}?`, parts[1].trim().split(" ").slice(0,4).join(" "), keywords.slice(0,3));
+      }
+    }
+    
+    // TYPE 3: Which type (if contains keyword like Article, Process etc)
+    if(!isHindi && s.match(/Article|Process|Right|Photosynthesis|Chlorophyll/i)){
+      addQ(`Which concept is described: "${s.slice(0,60)}..." ?`, important, keywords.filter(w=>w!==important).slice(0,3));
+    }
+  });
+
+  document.getElementById('quizTitle').innerText=`Advanced Quiz - ${qNo-1} Questions Generated from Your Notes`;
+  document.getElementById('quiz').innerHTML=html;
+  document.getElementById('quizArea').style.display='block';
+}
+loadSample('en');
+</script>
+</body>
+</html>
