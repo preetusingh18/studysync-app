@@ -1,4 +1,4 @@
-const API = "http://127.0.0.1:8001";
+const API = "https://studysync-backend-mo8x.onrender.com";
 
 async function login() {
   let e = document.getElementById('email').value;
