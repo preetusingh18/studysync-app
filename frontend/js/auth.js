@@ -21,3 +21,29 @@ async function login() {
   }
 }
 function logout(){ localStorage.clear(); window.location.href="login.html"; }
+async function signup() {
+  let n = document.getElementById('name').value;
+  let e = document.getElementById('email').value;
+  let p = document.getElementById('password').value;
+
+  if(!e || !p){
+    alert("Email aur Password to daalo!");
+    return;
+  }
+
+  try {
+    let res = await fetch(`${API}/signup`, {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({name: n, email: e, password: p})
+    });
+    let data = await res.json();
+  } catch(err) {
+  }
+
+  // Account phone me save kar do taaki login ho jaye
+  localStorage.setItem('user', e);
+  localStorage.setItem('token', 'test');
+  alert("Account ban gaya! Ab Login karo");
+  window.location.href = "login.html";
+}
