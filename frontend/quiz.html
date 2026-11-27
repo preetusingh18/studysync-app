@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quick Quiz</title>
+<style>body{font-family:Arial;background:#f3f0ff;margin:0;padding:15px}h1{color:#6a1b9a} .card{background:white;padding:15px;border-radius:12px;margin-bottom:12px;box-shadow:0 2px 8px #ddd} button{background:#6a1b9a;color:white;border:none;padding:10px 15px;border-radius:8px;margin:5px 0;width:100%;text-align:left;font-size:15px} a{color:#6a1b9a}</style>
+</head><body>
+<a href="dashboard.html">← Back to Dashboard</a>
+<h1>❓ Quick Quiz</h1>
+<p>Video wala - Ek question, turant jawab, turant result!</p>
+<div id="box" class="card"></div>
+<div id="result"></div>
+<script src="js/data.js"></script>
+<script>
+let i=0, score=0;
+function showQ(){
+  if(i>=QUIZ.length){
+    document.getElementById("box").innerHTML = `<h2>Ho gaya! 🎉</h2><p>Tumhara Score: ${score} / ${QUIZ.length}</p><p><a href="progress.html">Progress me dekho →</a></p>`;
+    localStorage.setItem("lastQuizScore", score + "/" + QUIZ.length);
+    localStorage.setItem("quizTotal", QUIZ.length);
+    localStorage.setItem("quizScore", score);
+    return;
+  }
+  let q = QUIZ[i];
+  let btns = "";
+  q.options.forEach((op, idx)=>{ btns += `<button onclick="check(${idx})">${op}</button><br>`; });
+  document.getElementById("box").innerHTML = `<h3>Q${i+1}. ${q.q}</h3>${btns}`;
+}
+function check(idx){
+  if(idx === QUIZ[i].answer){ score++; document.getElementById("result").innerHTML = "<b style='color:green'>✅ Sahi hai!</b>"; }
+  else { document.getElementById("result").innerHTML = "<b style='color:red'>❌ Galat! Sahi jawab: "+QUIZ[i].options[QUIZ[i].answer]+"</b>"; }
+  i++;
+  setTimeout(()=>{ document.getElementById("result").innerHTML=""; showQ(); }, 1200);
+}
+showQ();
+</script>
+</body></html>
