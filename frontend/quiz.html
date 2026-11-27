@@ -5,7 +5,7 @@
 </head><body>
 <a href="dashboard.html">← Back to Dashboard</a>
 <h1>❓ Quick Quiz</h1>
-<p>Video wala - Ek question, turant jawab, turant result!</p>
+<p>answer each question and check your score instantly!</p>
 <div id="box" class="card"></div>
 <div id="result"></div>
 <script src="js/data.js"></script>
@@ -13,7 +13,7 @@
 let i=0, score=0;
 function showQ(){
   if(i>=QUIZ.length){
-    document.getElementById("box").innerHTML = `<h2>Ho gaya! 🎉</h2><p>Tumhara Score: ${score} / ${QUIZ.length}</p><p><a href="progress.html">Progress me dekho →</a></p>`;
+    document.getElementById("box").innerHTML = `<h2>completed! 🎉</h2><p>your score: ${score} / ${QUIZ.length}</p><p><a href="progress.html">view progress →</a></p>`;
     localStorage.setItem("lastQuizScore", score + "/" + QUIZ.length);
     localStorage.setItem("quizTotal", QUIZ.length);
     localStorage.setItem("quizScore", score);
@@ -25,8 +25,8 @@ function showQ(){
   document.getElementById("box").innerHTML = `<h3>Q${i+1}. ${q.q}</h3>${btns}`;
 }
 function check(idx){
-  if(idx === QUIZ[i].answer){ score++; document.getElementById("result").innerHTML = "<b style='color:green'>✅ Sahi hai!</b>"; }
-  else { document.getElementById("result").innerHTML = "<b style='color:red'>❌ Galat! Sahi jawab: "+QUIZ[i].options[QUIZ[i].answer]+"</b>"; }
+  if(idx === QUIZ[i].answer){ score++; document.getElementById("result").innerHTML = "<b style='color:green'>✅correct!</b>"; }
+  else { document.getElementById("result").innerHTML = "<b style='color:red'>❌ wrong! correct answer: "+QUIZ[i].options[QUIZ[i].answer]+"</b>"; }
   i++;
   setTimeout(()=>{ document.getElementById("result").innerHTML=""; showQ(); }, 1200);
 }
