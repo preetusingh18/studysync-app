@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Progress</title>
+<style>body{font-family:Arial;background:#f3f0ff;margin:0;padding:15px}h1{color:#6a1b9a} .card{background:white;padding:15px;border-radius:12px;margin-bottom:12px;box-shadow:0 2px 8px #ddd} .bar{background:#eee;height:18px;border-radius:10px;overflow:hidden} .fill{background:#6a1b9a;height:18px} a{color:#6a1b9a}</style>
+</head><body>
+<a href="dashboard.html">← Back to Dashboard</a>
+<h1>📊 Mera Progress</h1>
+<p>Video wala Weekly Report - Bina AI, Code se</p>
+<div class="card"><h3>Time Table Progress</h3><div id="timeText"></div><div class="bar"><div class="fill" id="timeBar"></div></div></div>
+<div class="card"><h3>Quiz Progress</h3><div id="quizText"></div><div class="bar"><div class="fill" id="quizBar"></div></div></div>
+<div class="card"><h3>📅 Next Week Plan</h3><div id="plan"></div></div>
+<div class="card"><h3>Weak Topics</h3><div id="weak"></div></div>
+<script src="js/data.js"></script>
+<script>
+let done = JSON.parse(localStorage.getItem("doneDays") || "[]");
+let timePer = Math.round((done.length / TIMETABLE.length) * 100);
+document.getElementById("timeText").innerText = done.length + " / " + TIMETABLE.length + " Days Complete - " + timePer + "%";
+document.getElementById("timeBar").style.width = timePer + "%";
+
+let qs = parseInt(localStorage.getItem("quizScore") || "0");
+let qt = parseInt(localStorage.getItem("quizTotal") || "5");
+let quizPer = qt>0 ? Math.round((qs/qt)*100) : 0;
+document.getElementById("quizText").innerText = "Last Quiz Score: " + qs + " / " + qt + " - " + quizPer + "%";
+document.getElementById("quizBar").style.width = quizPer + "%";
+
+if(quizPer >= 80){ document.getElementById("plan").innerHTML = "Mon-Wed: New Topics<br>Thu-Fri: Mock Test<br>Sat-Sun: Revision"; document.getElementById("weak").innerHTML = "🎉 Koi weak topic nahi! Tum bahut accha kar rahi ho!"; }
+else if(quizPer >= 50){ document.getElementById("plan").innerHTML = "Mon-Wed: Maths + Science Revision<br>Thu-Fri: Quiz Practice<br>Sat: Mock, Sun: Full Revision"; document.getElementById("weak").innerHTML = "⚠️ Maths - Thoda aur practice karo"; }
+else { document.getElementById("plan").innerHTML = "Mon-Wed: Basics Zero se phir se<br>Thu-Fri: Easy Quiz<br>Sat-Sun: Revision + Notes"; document.getElementById("weak").innerHTML = "⚠️ Maths + Science - Basics pe dhyan do"; }
+if(!localStorage.getItem("quizScore")){ document.getElementById("weak").innerHTML = "Pehle Quick Quiz do, fir yaha report aayega!"; }
+</script>
+</body></html>
