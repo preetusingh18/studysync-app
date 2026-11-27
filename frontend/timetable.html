@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>60 Days Plan</title>
+<style>body{font-family:Arial;background:#f3f0ff;margin:0;padding:15px}h1{color:#6a1b9a} .card{background:white;padding:15px;border-radius:12px;margin-bottom:12px;box-shadow:0 2px 8px #ddd} .card b{color:#6a1b9a} button{background:#6a1b9a;color:white;border:none;padding:10px 15px;border-radius:8px} a{color:#6a1b9a}</style>
+</head><body>
+<a href="dashboard.html">← Back to Dashboard</a>
+<h1>📅 60 Days Plan</h1>
+<p>Video wala Roadmap - Bina AI, sirf Code se</p>
+<div id="list"></div>
+<script src="js/data.js"></script>
+<script>
+let done = JSON.parse(localStorage.getItem("doneDays") || "[]");
+let html = "";
+TIMETABLE.forEach(t => {
+  let checked = done.includes(t.day) ? "checked" : "";
+  html += `<div class="card"><input type="checkbox" ${checked} onchange="toggleDay(${t.day})"> <b>${t.title}</b><br>${t.task}<br>⏰ ${t.time}</div>`;
+});
+document.getElementById("list").innerHTML = html;
+function toggleDay(d){
+  if(done.includes(d)) done = done.filter(x=>x!==d); else done.push(d);
+  localStorage.setItem("doneDays", JSON.stringify(done));
+}
+</script>
+</body></html>
