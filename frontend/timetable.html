@@ -1,37 +1,50 @@
 <!DOCTYPE html>
-<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AI Time Table</title>
-<style>body{font-family:Arial;background:#f3f0ff;margin:0;padding:15px}h1{color:#6a1b9a}.card{background:white;padding:15px;border-radius:12px;margin-bottom:12px;box-shadow:0 2px 8px #ddd}input,button{padding:11px;border-radius:8px;border:1px solid #ccc;width:100%;margin:5px 0;box-sizing:border-box}button{background:#6a1b9a;color:white;border:none;font-size:15px;font-weight:bold}a{color:#6a1b9a;text-decoration:none}</style>
-</head><body>
-<a href="dashboard.html">← Back to Dashboard</a>
-<h1>📅 AI Time Table</h1>
-<p>Enter subject and AI will create a 7-day plan.</p>
+<style>
+body{font-family:Arial;background:#f3e8fd;margin:0;padding:15px}
+.card{background:white;padding:15px;border-radius:12px;margin:10px 0}
+input{padding:11px;width:100%;border-radius:8px;border:1px solid #ccc;margin:5px 0;box-sizing:border-box}
+button{padding:12px;width:100%;background:#6a1b9a;color:white;border:none;border-radius:8px;font-weight:bold;font-size:15px}
+#box{background:white;padding:15px;border-radius:12px;white-space:pre-wrap;line-height:1.6}
+a{color:#6a1b9a;text-decoration:none}
+</style>
+</head>
+<body>
+<a href="index.html">← Back to Dashboard</a>
+<h2>📅 AI Time Table</h2>
+
 <div class="card">
-<input id="apiKey" type="password" placeholder="Paste your API Key here (first time only)">
-<input id="topic" placeholder="Enter subject - e.g. Maths, Science">
+<input id="apiKey" type="password" placeholder="Paste API Key (only first time)">
+<input id="topic" placeholder="Enter subject - e.g. Physics">
 <button onclick="makePlan()">✨ Generate with AI</button>
 </div>
-<div id="box" class="card">Your AI plan will appear here...</div>
+
+<div id="box">Your 7-day plan will appear here...</div>
+
 <script>
 let savedKey = localStorage.getItem("geminiApiKey") || localStorage.getItem("apiKey") || "";
 if(savedKey) document.getElementById("apiKey").value = savedKey;
-let savedPlan = localStorage.getItem("aiTimetable");
-if(savedPlan) document.getElementById("box").innerHTML = savedPlan.replace(/\n/g,"<br>");
+let saved = localStorage.getItem("aiTimetable");
+if(saved) document.getElementById("box").innerText = saved;
 
 async function makePlan(){
-  let topic = document.getElementById("topic").value || "Study";
+  let topic = document.getElementById("topic").value || "Physics";
   let key = document.getElementById("apiKey").value.trim();
-  if(!key){ alert("Please paste your API Key first"); return; }
+  if(!key){ alert("Paste API Key first"); return; }
   localStorage.setItem("geminiApiKey", key);
   localStorage.setItem("apiKey", key);
-  document.getElementById("box").innerHTML = "Generating your plan... Please wait...";
+  document.getElementById("box").innerText = "Generating... Please wait...";
   try{
-    let res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key="+key, {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({contents:[{parts:[{text:"Create a 7-day study timetable in simple English for "+topic+". Give Day 1 to Day 7, each day 3 tasks."}]}]})});
+    let res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key="+key, {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({contents:[{parts:[{text:"Create a simple 7-day study timetable in easy English for "+topic+". Give day-wise plan with 3-4 hours study. Keep it simple."}]}]})});
     let data = await res.json();
-    let text = data.candidates?.[0]?.content?.parts?.[0]?.text || "Error: Check your API Key. " + JSON.stringify(data).slice(0,200);
-    document.getElementById("box").innerHTML = text.replace(/\n/g,"<br>");
+    let text = data.candidates?.[0]?.content?.parts?.[0]?.text || "Error: Check Key. " + JSON.stringify(data).slice(0,200);
+    document.getElementById("box").innerText = text;
     localStorage.setItem("aiTimetable", text);
-  }catch(e){ document.getElementById("box").innerHTML = "Error: " + e.message; }
+  }catch(e){ document.getElementById("box").innerText = "Error: " + e.message; }
 }
 </script>
-</body></html>
+</body>
+</html>
