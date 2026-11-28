@@ -550,11 +550,14 @@ document.getElementById('doubtInput').addEventListener('keydown', e => { if(e.ke
    7. INIT
    ===================================================== */
 document.getElementById('sharedNotes').value = localStorage.getItem('ss_shared') || '';
-document.getElementById('apiKey').value = getKey();
+let _k = localStorage.getItem("geminiApiKey") || localStorage.getItem("apiKey") || localStorage.getItem("gemini_key") || localStorage.getItem("api_key") || localStorage.getItem("GEMINI_API_KEY") || "";
+  if(_k){ localStorage.setItem("geminiApiKey", _k); localStorage.setItem("apiKey", _k); }
 document.getElementById('modelSel').value = getModel();
 if(!getKey()) document.getElementById('keyBox').open = true;
 renderSyllabus();
 updateStatus();
+
 </script>
+ 
 </body>
 </html>
