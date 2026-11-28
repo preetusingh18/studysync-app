@@ -1,24 +1,37 @@
 <!DOCTYPE html>
 <html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>60 Days Plan</title>
-<style>body{font-family:Arial;background:#f3f0ff;margin:0;padding:15px}h1{color:#6a1b9a} .card{background:white;padding:15px;border-radius:12px;margin-bottom:12px;box-shadow:0 2px 8px #ddd} .card b{color:#6a1b9a} button{background:#6a1b9a;color:white;border:none;padding:10px 15px;border-radius:8px} a{color:#6a1b9a}</style>
+<title>AI Time Table</title>
+<style>body{font-family:Arial;background:#f3f0ff;margin:0;padding:15px}h1{color:#6a1b9a}.card{background:white;padding:15px;border-radius:12px;margin-bottom:12px;box-shadow:0 2px 8px #ddd}input,button{padding:11px;border-radius:8px;border:1px solid #ccc;width:100%;margin:5px 0;box-sizing:border-box}button{background:#6a1b9a;color:white;border:none;font-size:15px;font-weight:bold}a{color:#6a1b9a;text-decoration:none}</style>
 </head><body>
 <a href="dashboard.html">← Back to Dashboard</a>
-<h1>📅 60 Days Plan</h1>
-<p>complete your daily tasks and track your progress</p>
-<div id="list"></div>
-<script src="js/data.js"></script>
+<h1>📅 AI Time Table</h1>
+<p>Enter subject and AI will create a 7-day plan.</p>
+<div class="card">
+<input id="apiKey" type="password" placeholder="Paste your API Key here (first time only)">
+<input id="topic" placeholder="Enter subject - e.g. Maths, Science">
+<button onclick="makePlan()">✨ Generate with AI</button>
+</div>
+<div id="box" class="card">Your AI plan will appear here...</div>
 <script>
-let done = JSON.parse(localStorage.getItem("doneDays") || "[]");
-let html = "";
-TIMETABLE.forEach(t => {
-  let checked = done.includes(t.day) ? "checked" : "";
-  html += `<div class="card"><input type="checkbox" ${checked} onchange="toggleDay(${t.day})"> <b>${t.title}</b><br>${t.task}<br>⏰ ${t.time}</div>`;
-});
-document.getElementById("list").innerHTML = html;
-function toggleDay(d){
-  if(done.includes(d)) done = done.filter(x=>x!==d); else done.push(d);
-  localStorage.setItem("doneDays", JSON.stringify(done));
+let savedKey = localStorage.getItem("geminiApiKey") || localStorage.getItem("apiKey") || "";
+if(savedKey) document.getElementById("apiKey").value = savedKey;
+let savedPlan = localStorage.getItem("aiTimetable");
+if(savedPlan) document.getElementById("box").innerHTML = savedPlan.replace(/\n/g,"<br>");
+
+async function makePlan(){
+  let topic = document.getElementById("topic").value || "Study";
+  let key = document.getElementById("apiKey").value.trim();
+  if(!key){ alert("Please paste your API Key first"); return; }
+  localStorage.setItem("geminiApiKey", key);
+  localStorage.setItem("apiKey", key);
+  document.getElementById("box").innerHTML = "Generating your plan... Please wait...";
+  try{
+    let res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key="+key, {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({contents:[{parts:[{text:"Create a 7-day study timetable in simple English for "+topic+". Give Day 1 to Day 7, each day 3 tasks."}]}]})});
+    let data = await res.json();
+    let text = data.candidates?.[0]?.content?.parts?.[0]?.text || "Error: Check your API Key. " + JSON.stringify(data).slice(0,200);
+    document.getElementById("box").innerHTML = text.replace(/\n/g,"<br>");
+    localStorage.setItem("aiTimetable", text);
+  }catch(e){ document.getElementById("box").innerHTML = "Error: " + e.message; }
 }
 </script>
 </body></html>
