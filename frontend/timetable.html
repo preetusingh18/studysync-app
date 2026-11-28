@@ -32,19 +32,21 @@ if(saved) document.getElementById("box").innerText = saved;
 
 async function makePlan(){
   let topic = document.getElementById("topic").value || "Physics";
-  let key = document.getElementById("apiKey").value.trim();
+  let key = document.getElementById("apiKey").value.trim() || localStorage.getItem("geminiApiKey") || localStorage.getItem("apiKey") || "";
   if(!key){ alert("Paste API Key first"); return; }
   localStorage.setItem("geminiApiKey", key);
   localStorage.setItem("apiKey", key);
   document.getElementById("box").innerText = "Generating... Please wait...";
   try{
-    let res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key="+key, {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({contents:[{parts:[{text:"Create a simple 7-day study timetable in easy English for "+topic+". Give day-wise plan with 3-4 hours study. Keep it simple."}]}]})});
+    let res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key="+key, {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({contents:[{parts:[{text:"Create a simple 7-day study timetable in easy English for "+topic+". Give day-wise plan with 3-4 hours study. Keep it simple."}]}]})});
     let data = await res.json();
     let text = data.candidates?.[0]?.content?.parts?.[0]?.text || "Error: Check Key. " + JSON.stringify(data).slice(0,200);
     document.getElementById("box").innerText = text;
     localStorage.setItem("aiTimetable", text);
   }catch(e){ document.getElementById("box").innerText = "Error: " + e.message; }
-}
+}let _k = localStorage.getItem("geminiApiKey") || localStorage.getItem("apiKey") || "";
+let _m = localStorage.getItem("geminiModel") || localStorage.getItem("model") || "gemini-3.8-flash";
+  
 </script>
 </body>
 </html>
