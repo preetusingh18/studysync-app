@@ -31,5 +31,34 @@ function check(idx){
   setTimeout(()=>{ document.getElementById("result").innerHTML=""; showQ(); }, 1200);
 }
 showQ();
+</script><div class="card" style="background:white;padding:15px;border-radius:12px;margin:10px 0">
+<input id="apiKey" type="password" placeholder="Paste API Key (first time only)" style="padding:11px;width:100%;border-radius:8px;border:1px solid #ccc;margin:5px 0;box-sizing:border-box">
+<input id="topic" placeholder="Enter topic - e.g. Science" style="padding:11px;width:100%;border-radius:8px;border:1px solid #ccc;margin:5px 0;box-sizing:border-box">
+<button onclick="makeQuiz()" style="padding:11px;width:100%;background:#6a1b9a;color:white;border:none;border-radius:8px;font-weight:bold">✨ Generate Quiz with AI</button>
+</div>
+<div id="box" style="background:white;padding:15px;border-radius:12px">Your Quiz will appear here...</div>
+
+<script>
+let savedKey = localStorage.getItem("geminiApiKey") || localStorage.getItem("apiKey") || "";
+if(savedKey) document.getElementById("apiKey").value = savedKey;
+let saved = localStorage.getItem("aiQuiz");
+if(saved) document.getElementById("box").innerHTML = saved.replace(/\n/g,"<br>");
+
+async function makeQuiz(){
+  let topic = document.getElementById("topic").value || "General";
+  let key = document.getElementById("apiKey").value.trim();
+  if(!key){ alert("Paste API Key first"); return; }
+  localStorage.setItem("geminiApiKey", key);
+  localStorage.setItem("apiKey", key);
+  document.getElementById("box").innerHTML = "Generating... Please wait...";
+  try{
+    let res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key="+key, {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({contents:[{parts:[{text:"Create 5 easy quiz questions in simple English on "+topic+". Give Question, 4 options A B C D, and Correct Answer."}]}]})});
+    let data = await res.json();
+    let text = data.candidates?.[0]?.content?.parts?.[0]?.text || "Error: Check Key. " + JSON.stringify(data).slice(0,200);
+    document.getElementById("box").innerHTML = text.replace(/\n/g,"<br>");
+    localStorage.setItem("aiQuiz", text);
+  }catch(e){ document.getElementById("box").innerHTML = "Error: " + e.message; }
+}
 </script>
+  
 </body></html>
