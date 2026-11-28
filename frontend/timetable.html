@@ -25,7 +25,7 @@ a{color:#6a1b9a;text-decoration:none}
 <div id="box">Your 7-day plan will appear here...</div>
 
 <script>
-let savedKey = localStorage.getItem("geminiApiKey") || localStorage.getItem("apiKey") || "";
+let savedKey = localStorage.getItem("geminiApiKey") || localStorage.getItem("apiKey") || localStorage.getItem("gemini_key") || localStorage.getItem("api_key") || localStorage.getItem("GEMINI_API_KEY") || localStorage.getItem("notesKey") || "";
 if(savedKey) document.getElementById("apiKey").value = savedKey;
 let saved = localStorage.getItem("aiTimetable");
 if(saved) document.getElementById("box").innerText = saved;
