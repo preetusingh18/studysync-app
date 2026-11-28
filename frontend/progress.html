@@ -27,5 +27,34 @@ if(quizPer >= 80){ document.getElementById("plan").innerHTML = "Mon-Wed: New Top
 else if(quizPer >= 50){ document.getElementById("plan").innerHTML = "Mon-Wed: Maths + Science Revision<br>Thu-Fri: Quiz Practice<br>Sat: Mock, Sun: Full Revision"; document.getElementById("weak").innerHTML = "⚠️ Maths -practice a little more"; }
 else { document.getElementById("plan").innerHTML = "mon-wed: basics from scratch<br>Thu-Fri: Easy Quiz<br>Sat-Sun: Revision + Notes"; document.getElementById("weak").innerHTML = "⚠️ maths+science-focus on basics"; }
 if(!localStorage.getItem("quizScore")){ document.getElementById("weak").innerHTML = "take the quick quiz first,then your report will appear here!"; }
+</script><div class="card" style="background:white;padding:15px;border-radius:12px;margin:10px 0">
+<input id="apiKey" type="password" placeholder="Paste API Key (first time only)" style="padding:11px;width:100%;border-radius:8px;border:1px solid #ccc;margin:5px 0;box-sizing:border-box">
+<input id="topic" placeholder="Enter subject - e.g. Maths, Science" style="padding:11px;width:100%;border-radius:8px;border:1px solid #ccc;margin:5px 0;box-sizing:border-box">
+<button onclick="makeProgress()" style="padding:11px;width:100%;background:#6a1b9a;color:white;border:none;border-radius:8px;font-weight:bold">✨ Check My Progress with AI</button>
+</div>
+<div id="box" style="background:white;padding:15px;border-radius:12px">Your Progress Report will appear here...</div>
+
+<script>
+let savedKey = localStorage.getItem("geminiApiKey") || localStorage.getItem("apiKey") || "";
+if(savedKey) document.getElementById("apiKey").value = savedKey;
+let saved = localStorage.getItem("aiProgress");
+if(saved) document.getElementById("box").innerHTML = saved.replace(/\n/g,"<br>");
+
+async function makeProgress(){
+  let topic = document.getElementById("topic").value || "All Subjects";
+  let key = document.getElementById("apiKey").value.trim();
+  if(!key){ alert("Paste API Key first"); return; }
+  localStorage.setItem("geminiApiKey", key);
+  localStorage.setItem("apiKey", key);
+  document.getElementById("box").innerHTML = "Analyzing... Please wait...";
+  try{
+    let res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key="+key, {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({contents:[{parts:[{text:"Give a simple student progress report in easy English for "+topic+". Tell 3 strengths, 3 weak points, and 3 tips to improve. Use simple points."}]}]})});
+    let data = await res.json();
+    let text = data.candidates?.[0]?.content?.parts?.[0]?.text || "Error: Check Key. " + JSON.stringify(data).slice(0,200);
+    document.getElementById("box").innerHTML = text.replace(/\n/g,"<br>");
+    localStorage.setItem("aiProgress", text);
+  }catch(e){ document.getElementById("box").innerHTML = "Error: " + e.message; }
+}
 </script>
+  
 </body></html>
